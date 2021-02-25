@@ -4,8 +4,7 @@
 \alias{plot.inferCNV}
 \title{Plot chromosome map}
 \usage{
-\method{plot}{inferCNV}(inferCNV, output = NULL, threshold = 0.2,
-  gamma = 1.5, resolution = 150)
+\method{plot}{inferCNV}(inferCNV, output = NULL, threshold = 0.2, gamma = 1.5, resolution = 150)
 }
 \arguments{
 \item{inferCNV}{Object of class inferCNV}
@@ -23,4 +22,18 @@ Nothing, a plot is generated in the default output devise
 }
 \description{
 This function generates a chromosomes map plot for the inferred CNVs
+}
+\examples{
+
+data(GSE103322, package="HNSCgenomicInstability")
+cnv <- inferCNV(tpm_matrix)
+cnv <- genomicInstabilityScore(cnv)
+cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
+\donttest{plot(cnv, output="test.png")}
+
+}
+\seealso{
+[giLikelihood()] to estimate the relative likelihood, [genomicInstabilityScore()] to estimate
+the genomic instability score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+of loci-blocks in the gene expression data.
 }

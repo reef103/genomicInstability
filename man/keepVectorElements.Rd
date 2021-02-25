@@ -2,13 +2,11 @@
 % Please edit documentation in R/general.r
 \name{keepVectorElements}
 \alias{keepVectorElements}
-\title{Keep vector elements}
+\title{This function filter a vector keeping only selected elements}
 \usage{
 keepVectorElements(x, elements)
 }
 \arguments{
-\item{x}{Vector}
-
 \item{elements}{vector of elements to keep}
 }
 \value{

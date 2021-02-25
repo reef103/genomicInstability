@@ -7,7 +7,20 @@
 #' @param inferCNV Object of class inferCNV
 #' @param legend Character string indicating the location of the legend. none to not include it
 #' @param ... Additional parameters for plot()
+#' 
 #' @return None, a figure is created in the default output device
+#' 
+#' @examples
+#' 
+#' data(GSE103322, package="HNSCgenomicInstability")
+#' cnv <- inferCNV(tpm_matrix)
+#' cnv <- genomicInstabilityScore(cnv)
+#' cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
+#' giDensityPlot(cnv)
+#' 
+#' @seealso [giLikelihood()] to estimate the relative likelihood, [genomicInstabilityScore()] to estimate
+#' the genomic instability score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+#' of loci-blocks in the gene expression data.
 #' @export
 giDensityPlot <- function(inferCNV, legend=c("topleft", "top", "topright", "none"), ...) {
     # Validate inputs
@@ -36,7 +49,21 @@ giDensityPlot <- function(inferCNV, legend=c("topleft", "top", "topright", "none
 #' @param threshold Likelihood threshold for identifying genomically inestable cells/samples, 0 disables this filter
 #' @param gamma Number indicating the gamma transformation for the colors
 #' @param resolution Integer indicating the ppi for the png and jpg output files
+#' 
 #' @return Nothing, a plot is generated in the default output devise
+#' 
+#' @examples 
+#' 
+#' data(GSE103322, package="HNSCgenomicInstability")
+#' cnv <- inferCNV(tpm_matrix)
+#' cnv <- genomicInstabilityScore(cnv)
+#' cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
+#' \donttest{plot(cnv, output="test.png")}
+#' 
+#' @seealso [giLikelihood()] to estimate the relative likelihood, [genomicInstabilityScore()] to estimate
+#' the genomic instability score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+#' of loci-blocks in the gene expression data.
+#' @method plot inferCNV
 #' @export
 plot.inferCNV <- function(inferCNV, output=NULL, threshold=.2, gamma=1.5, resolution=150) {
     # Validate inputs
@@ -121,12 +148,12 @@ plot.inferCNV <- function(inferCNV, output=NULL, threshold=.2, gamma=1.5, resolu
         dev <- dev.off()
 }
 
-#' Sort the rows of a matrix based on hierarchical cluster analysis
-#' 
-#' @param x Numeric matrix
-#' @param metric Character string indicating the distance metric
-#' @param method Character string indicating the method for the hierarchical cluster analysis
-#' @return Numerical matrix
+# Sort the rows of a matrix based on hierarchical cluster analysis
+# 
+# @param x Numeric matrix
+# @param metric Character string indicating the distance metric
+# @param method Character string indicating the method for the hierarchical cluster analysis
+# @return Numerical matrix
 sortRowsByHclust <- function(x, metric=c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"), method=c("complete", "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid")) {
     # Validate inputs
     checkmate::assertMatrix(x, mode="numeric", any.missing=FALSE, min.rows=2, min.cols=2)
@@ -138,10 +165,10 @@ sortRowsByHclust <- function(x, metric=c("euclidean", "maximum", "manhattan", "c
     x[pos, , drop=FALSE]
 }
 
-#' split matrix by chromosome
-#' 
-#' @param x matrix of NES with cells or samples in rows and chromosome fragments in columns
-#' @return List of matrices
+# split matrix by chromosome
+# 
+# @param x matrix of NES with cells or samples in rows and chromosome fragments in columns
+# @return List of matrices
 splitByChromosome <- function(x) {
     # Get the chromosomes from the names of the columns
     chr <- getElementsFromString(colnames(x), sep="-", pos=1)
@@ -157,17 +184,17 @@ splitByChromosome <- function(x) {
     res
 }
 
-#' colorScale
-#' 
-#' This function generates a color scale
-#' 
-#' @param x Vector or matrix of numeric values
-#' @param color Vector of character strings indicating the colors for the scale. Up to three colors can be defined. While is used for the missing color
-#' @param gama Number indicating the gama transformation
-#' @param alpha Number between 0 and 1 indicating the transparency of the color (1 for absolute color)
-#' @param scmax Number indicating the maximum value for the scale
-#' @param nacol Character string indicating the color for missing values
-#' @return Vector of colors
+# colorScale
+# 
+# This function generates a color scale
+# 
+# @param x Vector or matrix of numeric values
+# @param color Vector of character strings indicating the colors for the scale. Up to three colors can be defined. While is used for the missing color
+# @param gama Number indicating the gama transformation
+# @param alpha Number between 0 and 1 indicating the transparency of the color (1 for absolute color)
+# @param scmax Number indicating the maximum value for the scale
+# @param nacol Character string indicating the color for missing values
+# @return Vector of colors
 colorScale <- function(x, color=c("royalblue","firebrick2"), gama=1, alpha=1, scmax=0, nacol="grey80") {
     if (length(color)==1) color <- c(color, "white", color)
     if (length(color)==2) color <- c(color[1], "white", color[2])
@@ -186,20 +213,20 @@ colorScale <- function(x, color=c("royalblue","firebrick2"), gama=1, alpha=1, sc
     return(col)
 }
 
-#' Plot heatmap
-#'
-#' This function produce a heatmap plot from a numerical matrix
-#'
-#' @param x Numerical matrix
-#' @param color Two character strings vector describing the colors for the heatmap
-#' @param gama Number, indicating the exponential transformation for the color scale
-#' @param cex Number indicating the magnification factor for the labels
-#' @param grid Logical, whether a grid should be ploted
-#' @param scale Number between 0 and .9 indicating the proportion of vertical space used to draw the color scale
-#' @param scmax Optional number indicating the maximum value to be allowed for the heatmap
-#' @param box Logical, whether to draw a box around the plot
-#' @param ... Additional parameters to pass to the plot function
-#' @return Nothing, a heatmap is produced in the default output device
+# Plot heatmap
+#
+# This function produce a heatmap plot from a numerical matrix
+#
+# @param x Numerical matrix
+# @param color Two character strings vector describing the colors for the heatmap
+# @param gama Number, indicating the exponential transformation for the color scale
+# @param cex Number indicating the magnification factor for the labels
+# @param grid Logical, whether a grid should be ploted
+# @param scale Number between 0 and .9 indicating the proportion of vertical space used to draw the color scale
+# @param scmax Optional number indicating the maximum value to be allowed for the heatmap
+# @param box Logical, whether to draw a box around the plot
+# @param ... Additional parameters to pass to the plot function
+# @return Nothing, a heatmap is produced in the default output device
 plothm <- function(x, color=c("royalblue","firebrick2"), gama=1, cex=1, grid=T, scale=F, scmax=0, box=TRUE, ...) {
     if (scale>0) {
         if (scale==1) ff <- 6/(nrow(x)+5)
@@ -229,11 +256,11 @@ plothm. <- function(x, color=c("royalblue","firebrick2"), gama=1, grid=T, scmax=
     if (grid) grid(ncol(x), nrow(x), col="black", lty=1)
 }
 
-#' Transform data for the heatmap plot
-#' 
-#' @param x either matrix or list of matrices
-#' @param method Character string indicating the transformation method
-#' @return Transformed matrix or list of matrices
+# Transform data for the heatmap plot
+# 
+# @param x either matrix or list of matrices
+# @param method Character string indicating the transformation method
+# @return Transformed matrix or list of matrices
 transformNesForPlot <- function(x, method=c("scale", "equalize")) {
     method <- match.arg(method)
     # Transformation function
@@ -242,11 +269,11 @@ transformNesForPlot <- function(x, method=c("scale", "equalize")) {
     return(x)
 }
 
-#' Transformation function for NES
-#' 
-#' @param x Numeric vector
-#' @param method Character string indicating the transformation method
-#' @return Function that takes a vector or matrix of values to be transformed and returns a vector or matrix of transformed values
+# Transformation function for NES
+# 
+# @param x Numeric vector
+# @param method Character string indicating the transformation method
+# @return Function that takes a vector or matrix of values to be transformed and returns a vector or matrix of transformed values
 nesTransformationFunction <- function(x, method=c("scale", "equalize")) {
     # Check method values
     method <- match.arg(method)
@@ -265,11 +292,11 @@ nesTransformationFunction <- function(x, method=c("scale", "equalize")) {
            })
 }
 
-#' Apply NES transformation
-#' 
-#' @param x MAtrix or list of matrices
-#' @param transformation Function generated by nesTRansformationFunction() function
-#' @return Transformed matrix or list of matrices
+# Apply NES transformation
+# 
+# @param x MAtrix or list of matrices
+# @param transformation Function generated by nesTRansformationFunction() function
+# @return Transformed matrix or list of matrices
 applyNesTransformation <- function(x, transformation) {
     if (is.list(x)) {
         x <- lapply(x, applyNesTransformation, transformation)

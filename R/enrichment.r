@@ -1,13 +1,6 @@
 # Functions for enrichment analysis
+# All the functions below are internal for the package
 
-#' Simple one-tail rank based enrichment analysis sREA
-#' 
-#' This function performs simple 1-tail rank based enrichment analysis
-#' 
-#' @param signatures Numeric matrix of signatures
-#' @param groups List containing the groups as vectors of sample names
-#' @return Matrix of Normalized Enrichment Zcores
-#' @export
 sREA <- function(signatures, groups) {
     # Check signatures is a matrix
     if (is.null(nrow(signatures)))
@@ -75,16 +68,6 @@ aecdf1 <- function(dnull, symmetric=FALSE, x, alternative=c("two.sided", "greate
     return(list(nes=nes, p.value=p))
 }
 
-
-#' Compute NES for a specific row of a matrix
-#' 
-#' This function estimates the NES for a specific row of a matrix
-#' 
-#' @param i Integer indicating the row number
-#' @param nesmat Matrix of scores
-#' @param nullmat Matrix for the null model
-#' @return Vctor of NES
-#' @export
 computeNesForMatrixRow <- function(i, nesmat, nullmat) {
     aecdf1(nullmat[i, ], x=nesmat[i, ])$nes
 }

@@ -1,15 +1,19 @@
 Package: genomicInstability
-Version: 1.0.0
-Date: 2020-11-11
-Title: Genomic Instability estimation from scRNA-Seq
+Version: 0.9.0
+Date: 2020-02-21
+Title: Genomic Instability estimation for scRNA-Seq
 Author: Pasquale Laise <plaise@darwinhealth.com>,Mariano J Alvarez <malvarez@darwinhealth.com>
-Maintainer: Pasquale Laise <plaise@darwinhealth.com>
+Maintainer: Mariano J Alvarez  <malvarez@darwinhealth.com>
 Depends:
-    R (>= 3.0.0),
+    R (>= 3.5.3),
     checkmate
+Suggests:
+    HNSCgenomicInstability,
+    pROC
 Imports:
     mixtools
 Description: This package contain functions to run genomic instability analysis from scRNA-Seq.
-License: GPL (>=2)
+License: file LICENSE
+biocViews: SystemsBiology, GeneExpression, Single-cell
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1

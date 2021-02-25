@@ -4,8 +4,15 @@
 \alias{inferCNV}
 \title{Inference of CNV from expression data}
 \usage{
-inferCNV(expmat, nullmat = NULL, species = c("human", "mouse"),
-  k = 100, skip = 25, min_geneset = 10, verbose = TRUE)
+inferCNV(
+  expmat,
+  nullmat = NULL,
+  species = c("human", "mouse"),
+  k = 100,
+  skip = 25,
+  min_geneset = 10,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{expmat}{Matrix of gene expression profiles or signatures with genes (entrezID) in rows and samples in columns}
@@ -27,4 +34,12 @@ Object of class inferCNV, which is a list containing matrix of nes, and paramete
 }
 \description{
 This function estimates the CNV score based on expression data
+}
+\examples{
+data(GSE103322, package="HNSCgenomicInstability")
+cnv <- inferCNV(tpm_matrix)
+class(cnv)
+names(cnv)
+cnv$nes[1:5, 1:3]
+
 }

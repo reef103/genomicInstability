@@ -4,8 +4,7 @@
 \alias{generateChromosomeGeneSet}
 \title{Topological gene sets}
 \usage{
-generateChromosomeGeneSet(species = c("human", "mouse"), k = 100,
-  skip = 25)
+generateChromosomeGeneSet(species = c("human", "mouse"), k = 100, skip = 25)
 }
 \arguments{
 \item{species}{Character string indicating the species, either human or mouse}
@@ -19,4 +18,10 @@ List of topoligically-close gene sets
 }
 \description{
 This function generates a list of sets of k genes encoded by neighbor loci
+}
+\examples{
+chrom_set <- generateChromosomeGeneSet("human")
+length(chrom_set)
+chrom_set[1:2]
+
 }

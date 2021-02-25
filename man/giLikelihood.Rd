@@ -4,8 +4,13 @@
 \alias{giLikelihood}
 \title{Genomic instability likelihood}
 \usage{
-giLikelihood(inferCNV, recompute = TRUE, distros = c(1, 3),
-  tumor = NULL, normal = NULL)
+giLikelihood(
+  inferCNV,
+  recompute = TRUE,
+  distros = c(1, 3),
+  tumor = NULL,
+  normal = NULL
+)
 }
 \arguments{
 \item{inferCNV}{InferCNV-class object}
@@ -23,4 +28,19 @@ Updated inferCNV-class object with gi_likelihood slot
 }
 \description{
 This function computes the genomic instability likelihood
+}
+\examples{
+
+data(GSE103322, package="HNSCgenomicInstability")
+cnv <- inferCNV(tpm_matrix)
+cnv <- genomicInstabilityScore(cnv)
+cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
+print(cnv$gi_fit)
+plot(density(cnv$gi_likelihood, from=0, to=1))
+
+}
+\seealso{
+[genomicInstabilityScore()] to estimate the genomic instability score for
+each cell in the dataset, and [inferCNV()] to infer the enrichment of loci-blocks
+in the gene expression data.
 }
