@@ -44,10 +44,11 @@ giDensityPlot <- function(inferCNV, legend=c("topleft", "top", "topright", "none
 #' 
 #' This function generates a chromosomes map plot for the inferred CNVs
 #' 
-#' @param inferCNV Object of class inferCNV
+#' @param x Object of class inferCNV
 #' @param output Optional output PDF file name (with extension)
 #' @param threshold Likelihood threshold for identifying genomically inestable cells/samples, 0 disables this filter
 #' @param gamma Number indicating the gamma transformation for the colors
+#' @param ... Additional parameters for plot
 #' @param resolution Integer indicating the ppi for the png and jpg output files
 #' 
 #' @return Nothing, a plot is generated in the default output devise
@@ -65,7 +66,8 @@ giDensityPlot <- function(inferCNV, legend=c("topleft", "top", "topright", "none
 #' of loci-blocks in the gene expression data.
 #' @method plot inferCNV
 #' @export
-plot.inferCNV <- function(inferCNV, output=NULL, threshold=.2, gamma=1.5, resolution=150) {
+plot.inferCNV <- function(x, output=NULL, threshold=.2, gamma=1.5, resolution=150, ...) {
+    inferCNV <- x
     # Validate inputs
     validateInferCNV(inferCNV, "nes")
     checkmate::assertCharacter(output, min.chars=1, any.missing=FALSE, len=1, null.ok=TRUE)
@@ -138,7 +140,7 @@ plot.inferCNV <- function(inferCNV, output=NULL, threshold=.2, gamma=1.5, resolu
             else if (group==length(group_size)) par(mai=c(.1, .01, .01, .01))
             else par(mai=c(.01, .01, .01, .01))
             # Drawing the heatmaps
-            plothm(nesplot[[group]][[chrom]], grid=FALSE, scmax=1, gama=gamma)
+            plothm(nesplot[[group]][[chrom]], grid=FALSE, scmax=1, gama=gamma, ...)
             # Ading the axis labels
             if (group==1) axis(3, ncol(nes[[group]][[chrom]])/2, names(nes[[group]])[chrom], tick=FALSE, las=1, line=-.5)
             if (chrom==1) axis(2, nrow(nes[[group]][[chrom]])/2, names(nes)[group], tick=FALSE, las=3, line=-.5)

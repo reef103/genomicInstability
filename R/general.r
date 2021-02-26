@@ -56,12 +56,12 @@ colVars <- function(x) rowVars(t(x))
 
 
 # Keep vector elements
-#' 
-#' This function filter a vector keeping only selected elements
-#' 
+# 
+# This function filter a vector keeping only selected elements
+# 
 # @param x Vector
-#' @param elements vector of elements to keep
-#' @return Filtered vector
+# @param elements vector of elements to keep
+# @return Filtered vector
 keepVectorElements <- function(x, elements) x[x %in% elements]
 
 # Get elements from string

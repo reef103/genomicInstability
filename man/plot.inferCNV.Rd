@@ -4,10 +4,10 @@
 \alias{plot.inferCNV}
 \title{Plot chromosome map}
 \usage{
-\method{plot}{inferCNV}(inferCNV, output = NULL, threshold = 0.2, gamma = 1.5, resolution = 150)
+\method{plot}{inferCNV}(x, output = NULL, threshold = 0.2, gamma = 1.5, resolution = 150, ...)
 }
 \arguments{
-\item{inferCNV}{Object of class inferCNV}
+\item{x}{Object of class inferCNV}
 
 \item{output}{Optional output PDF file name (with extension)}
 
@@ -16,6 +16,8 @@
 \item{gamma}{Number indicating the gamma transformation for the colors}
 
 \item{resolution}{Integer indicating the ppi for the png and jpg output files}
+
+\item{...}{Additional parameters for plot}
 }
 \value{
 Nothing, a plot is generated in the default output devise
