@@ -298,8 +298,15 @@ plot(cnv_norm, output="heatmap.png", resolution=120, gamma=2)
 \caption{Heatmap for the enrichment of loci-blocks on the expression profile of each cell. Loci-blocks (columns) have been organized by chromosome. Cells (rows) have been sorted by GIS and divided in 3 groups: (1) Unstable (GI likelihood $>$ 0.8), (2) Intermediate (0.2 $\geq$ GI likelihood $\geq$ 0.8), and (3) Stable (GI likelihood $<$ 0.2). Red color in the heatmap indicates potential genomic amplifications, while blue color shows potential deletions.}\label{fig:heatmap}
 \end{figure}
 
-%-----------
+%---------
 \FloatBarrier
+\section{Session Information}
+
+<<echo=FALSE, results=verbatim>>=
+sessionInfo()
+@
+
+%-----------
 \begin{thebibliography}{9}
 \bibitem{Hanahan2011} Hanahan, D. \& Weinberg, R. A. Hallmarks of cancer: the next generation. Cell 144, 646--674 (2011).
 

@@ -1,7 +1,11 @@
 Package: genomicInstability
-Version: 0.9.0
+Version: 0.99.0
 Date: 2020-02-21
 Title: Genomic Instability estimation for scRNA-Seq
+Authors@R: c(person("Mariano", "Alvarez", "J.", role=c("aut", "cre"),
+           email="malvarez@darwinhealth.com"),
+           person("Pasquale, "Laise", role="aut", email="plaise@darwinhealth.com"),
+           person("DarwinHealth", role="cph"))
 Author: Pasquale Laise <plaise@darwinhealth.com>,Mariano J Alvarez <malvarez@darwinhealth.com>
 Maintainer: Mariano J Alvarez  <malvarez@darwinhealth.com>
 Depends:
@@ -14,6 +18,9 @@ Imports:
     mixtools
 Description: This package contain functions to run genomic instability analysis from scRNA-Seq.
 License: file LICENSE
-biocViews: SystemsBiology, GeneExpression, Single-cell
+biocViews: SystemsBiology, GeneExpression, SingleCell
+BiocType: Software
+URL: https://github.com/DarwinHealth/genomicInstability
+BugReports: https://github.com/DarwinHealth/genomicInstability
 Encoding: UTF-8
 RoxygenNote: 7.1.1
