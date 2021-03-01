@@ -2,25 +2,31 @@ Package: genomicInstability
 Version: 0.99.0
 Date: 2020-02-21
 Title: Genomic Instability estimation for scRNA-Seq
-Authors@R: c(person("Mariano", "Alvarez", "J.", role=c("aut", "cre"),
-           email="malvarez@darwinhealth.com"),
-           person("Pasquale", "Laise", role="aut", email="plaise@darwinhealth.com"),
+Authors@R: c(person("Mariano", "Alvarez", role=c("aut", "cre"),
+           email="reef103@gmail.com"),
+           person("Pasquale", "Laise", role="aut",
+           email="plaise@darwinhealth.com"),
            person("DarwinHealth", role="cph"))
-Author: Pasquale Laise <plaise@darwinhealth.com>,Mariano J Alvarez <malvarez@darwinhealth.com>
-Maintainer: Mariano J Alvarez  <malvarez@darwinhealth.com>
 Depends:
-    R (>= 3.5.3),
+    R (>= 4.0.0),
     checkmate
 Suggests:
     HNSCgenomicInstability,
     pROC
 Imports:
     mixtools
-Description: This package contain functions to run genomic instability analysis from scRNA-Seq.
+Description:
+    This package contain functions to run genomic instability analysis (GIA)
+    from scRNA-Seq data.
+    GIA estimates the association between gene expression and genomic location
+    of the coding genes.
+    It uses the aREA algorithm to quantify the enrichment of sets of
+    contiguous genes (loci-blocks) on the gene expression profiles and
+    estimates the Genomic Instability Score (GIS) for each analyzed cell.
 License: file LICENSE
 biocViews: SystemsBiology, GeneExpression, SingleCell
 BiocType: Software
 URL: https://github.com/DarwinHealth/genomicInstability
 BugReports: https://github.com/DarwinHealth/genomicInstability
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+ARoxygenNote: 7.1.1
