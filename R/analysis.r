@@ -15,7 +15,7 @@
 #' @examples
 #' chrom_set <- generateChromosomeGeneSet('human')
 #' length(chrom_set)
-#' chrom_set[1:2]
+#' chrom_set[seq_len(2)]
 #'
 #' @export
 generateChromosomeGeneSet <- function(species = c("human", "mouse"), k = 100,

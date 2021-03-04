@@ -39,7 +39,7 @@ The package \texttt{genomicInstability} provides an implementation of the GIA al
 
 %--------
 \section{Installation of \emph{genomicInstability} package}
-The \emph{genomicInstability} package requires the R-system (\url{http://www.r-project.org}), the \emph{checkmate} package (\url{https://cran.r-project.org/web/packages/checkmate/index.html}), the \emph{mixtools} package (\url{http://www.bioconductor.org}), and the \emph{HNSCgenomicInstability} (Bioconductor) and \emph{pROC} (\url{https://cran.r-project.org/web/packages/pROC/}) packages to run the examples in this vignette.
+The \emph{genomicInstability} package requires the R-system (\url{http://www.r-project.org}), the \emph{checkmate} package (\url{https://cran.r-project.org/web/packages/checkmate/index.html}), the \emph{mixtools} package (\url{http://www.bioconductor.org}), and the \emph{ExperimentHub} (\url{https://www.bioconductor.org/packages/release/bioc/html/ExperimentHub.html}) and \emph{pROC} (\url{https://cran.r-project.org/web/packages/pROC/}) packages to run the examples in this vignette.
 After installing R, all required components can be obtained with:
 
 <<echo=TRUE, eval=FALSE, results=hide>>=
@@ -47,15 +47,15 @@ if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 install.packages("checkmate")
 BiocManager::install("mixtools")
-BiocManager::install("HNSCgenomicInstability")
+BiocManager::install("ExperimentHub")
 BiocManager::install("genomicInstability")
 install.packages("pROC")
 @
 
 %--------
-\section{Use-case example for the analyzing of 500 cells including HNSC and normal stroma cells}
-For this vignette, we will use a small subset of the Head and Neck Squamous Carcinoma (HNSC) scRNA-Seq dataset by Puram et. al \cite{Puram2017}.
-For this, 500 cells have been selected uniformly at random and included in the GSE102233 data object of package \texttt{HNSCgenomicInstability}.
+\section{Use-case example for the analyzing HNSC and normal cells}
+For the example analysis in this vignette, we will use the Head and Neck Squamous Carcinoma (HNSC) scRNA-Seq dataset by Puram et. al \cite{Puram2017}.
+This dataset is available from Gene Expression Omnibus (GEO) as \href{GSE102233}{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322}.
 
 %----
 \subsection{Getting started}
@@ -66,12 +66,13 @@ library(genomicInstability)
 
 %------
 \subsection{Estimating the association between gene expression and loci-blocks}
+For convenience, we will obtain the data and metadata for this example case as a \emph{SingleCellExperiment}-class data object using the package \texttt{ExpressionHub}.
+
 The GSE102233 data object contains two variables: (1) \texttt{tpm\_matrix}, which is a matrix of scRNA-Seq data---transcripts per million (TPM)---for 23,014 genes, with EntrezID as gene identifiers (rownames), by 500 cells (columns); and (2) \texttt{metadata\_tumor}, which is a logical vector indicating whether each of the 500 cells have been annotated as tumor or normal by Puram et. al.
 
 <<echo=TRUE, results=verbatim>>=
-data(GSE103322, package="HNSCgenomicInstability")
-dim(tpm_matrix)
-length(metadata_tumor)
+eh <- ExperimentHub::ExperimentHub()
+
 @
 
 The association between gene expression and loci-blocks is estimated by the function \texttt{inferCNV()}.
