@@ -39,7 +39,7 @@ The package \texttt{genomicInstability} provides an implementation of the GIA al
 
 %--------
 \section{Installation of \emph{genomicInstability} package}
-The \emph{genomicInstability} package requires the R-system (\url{http://www.r-project.org}), the \emph{checkmate} package (\url{https://cran.r-project.org/web/packages/checkmate/index.html}), the \emph{mixtools} package (\url{http://www.bioconductor.org}), and the \emph{ExperimentHub} (\url{https://www.bioconductor.org/packages/release/bioc/html/ExperimentHub.html}) and \emph{pROC} (\url{https://cran.r-project.org/web/packages/pROC/}) packages to run the examples in this vignette.
+The \emph{genomicInstability} package requires the \href{http://www.r-project.org}{R-system}, the \href{https://cran.r-project.org/web/packages/checkmate/index.html}{checkmate package}, the \href{http://www.bioconductor.org}{mixtools package}, and the \href{https://www.bioconductor.org/packages/release/bioc/html/ExperimentHub.html}{ExperimentHub}, \href{https://www.bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html}{SingleCellExperiment} and \href{https://cran.r-project.org/web/packages/pROC/}{pROC} packages to run the examples in this vignette.
 After installing R, all required components can be obtained with:
 
 <<echo=TRUE, eval=FALSE, results=hide>>=
@@ -47,6 +47,7 @@ if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 install.packages("checkmate")
 BiocManager::install("mixtools")
+BiocManager::install("SingleCellExperiment")
 BiocManager::install("ExperimentHub")
 BiocManager::install("genomicInstability")
 install.packages("pROC")
@@ -55,7 +56,7 @@ install.packages("pROC")
 %--------
 \section{Use-case example for the analyzing HNSC and normal cells}
 For the example analysis in this vignette, we will use the Head and Neck Squamous Carcinoma (HNSC) scRNA-Seq dataset by Puram et. al \cite{Puram2017}.
-This dataset is available from Gene Expression Omnibus (GEO) as \href{GSE102233}{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322}.
+This dataset is available from Gene Expression Omnibus (GEO) as \href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322}{GSE102233}.
 
 %----
 \subsection{Getting started}
