@@ -42,7 +42,7 @@ This function estimates the CNV score based on expression data
 \examples{
 eh <- ExperimentHub::ExperimentHub()
 dset <- eh[["EH5419"]]
-tpm_matrix <- assays(dset)$TPM
+tpm_matrix <- SummarizedExperiment::assays(dset)$TPM
 set.seed(1)
 tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 cnv <- inferCNV(tpm_matrix)

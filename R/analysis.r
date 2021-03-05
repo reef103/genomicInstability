@@ -76,7 +76,7 @@ skip = 25) {
 #' @examples
 #' eh <- ExperimentHub::ExperimentHub()
 #' dset <- eh[["EH5419"]]
-#' tpm_matrix <- assays(dset)$TPM
+#' tpm_matrix <- SummarizedExperiment::assays(dset)$TPM
 #' set.seed(1)
 #' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
@@ -158,7 +158,7 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
 #'
 #' eh <- ExperimentHub::ExperimentHub()
 #' dset <- eh[["EH5419"]]
-#' tpm_matrix <- assays(dset)$TPM
+#' tpm_matrix <- SummarizedExperiment::assays(dset)$TPM
 #' set.seed(1)
 #' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
@@ -207,7 +207,7 @@ genomicInstabilityScore <- function(cnv, likelihood = FALSE) {
 #'
 #' eh <- ExperimentHub::ExperimentHub()
 #' dset <- eh[["EH5419"]]
-#' tpm_matrix <- assays(dset)$TPM
+#' tpm_matrix <- SummarizedExperiment::assays(dset)$TPM
 #' set.seed(1)
 #' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
