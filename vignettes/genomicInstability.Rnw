@@ -54,7 +54,7 @@ install.packages("pROC")
 @
 
 %--------
-\section{Use-case example for the analyzing HNSC and normal cells}
+\section{Use-case example for the analysis of HNSC and normal cells}
 For the example analysis in this vignette, we will use the Head and Neck Squamous Carcinoma (HNSC) scRNA-Seq dataset by Puram et. al \cite{Puram2017}.
 This dataset is available from Gene Expression Omnibus (GEO) as \href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103322}{GSE102233}.
 
@@ -79,8 +79,8 @@ dset <- eh[["EH5419"]]
 @
 
 The data in this SCE-class object is a Transcripts-per-million (TPM) matrix for 21,341 known genes (EntrezID) across 5,902 cells.
-The metadata includes information regarding the enzyme used for reverse transcription, whether the sample was isolates from lymph nodes or is a primary tumor, whether the cell is classified as tumor or normal and the type of normal cell, according to Puram et. al\cite{Puram2017}.
-To reduce execution time, we will limit the analysis in this vignette to a subset of 500 cells, selected uniformly at random---we sfix the random seed for reproducibility purposes---from the 5,902 represented in the dataset.
+The metadata includes information regarding the enzyme used for reverse transcription, whether the sample was isolated from lymph nodes or is a primary tumor, and whether the cells are classified as tumor or normal, as well as the type of normal cell according to Puram et. al\cite{Puram2017}.
+To reduce execution time, we will limit the analysis in this vignette to a subset of 500 cells, selected uniformly at random---we fix the random seed for reproducibility purposes---from the 5,902 represented in the dataset.
 
 <<echo=TRUE, results=verbatim>>==
 tpm_matrix <- assays(dset)$TPM
