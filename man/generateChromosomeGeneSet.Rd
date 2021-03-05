@@ -11,7 +11,8 @@ generateChromosomeGeneSet(species = c("human", "mouse"), k = 100, skip = 25)
 
 \item{k}{Integer indicating the number of genes per set}
 
-\item{skip}{Interger indicating the displacement of the window for selecting the k genes}
+\item{skip}{Interger indicating the displacement of the window for selecting
+the k genes}
 }
 \value{
 List of topoligically-close gene sets
@@ -20,8 +21,8 @@ List of topoligically-close gene sets
 This function generates a list of sets of k genes encoded by neighbor loci
 }
 \examples{
-chrom_set <- generateChromosomeGeneSet("human")
+chrom_set <- generateChromosomeGeneSet('human')
 length(chrom_set)
-chrom_set[1:2]
+chrom_set[seq_len(2)]
 
 }

@@ -68,11 +68,25 @@ library(genomicInstability)
 \subsection{Estimating the association between gene expression and loci-blocks}
 For convenience, we will obtain the data and metadata for this example case as a \emph{SingleCellExperiment}-class data object using the package \texttt{ExpressionHub}.
 
-The GSE102233 data object contains two variables: (1) \texttt{tpm\_matrix}, which is a matrix of scRNA-Seq data---transcripts per million (TPM)---for 23,014 genes, with EntrezID as gene identifiers (rownames), by 500 cells (columns); and (2) \texttt{metadata\_tumor}, which is a logical vector indicating whether each of the 500 cells have been annotated as tumor or normal by Puram et. al.
+The access number for GSE102233 in ExperimentHub is ``EH5419'' and we can access the data and metadata as a SingleCellExperiment-class (SCE) object with:
 
-<<echo=TRUE, results=verbatim>>=
-eh <- ExperimentHub::ExperimentHub()
+<<echo=TRUE, results=hide>>=
+library(SingleCellExperiment)
+library(ExperimentHub)
+eh <- ExperimentHub()
+dset <- eh[["EH5419"]]
+@
 
+The data in this SCE-class object is a Transcripts-per-million (TPM) matrix for 21,341 known genes (EntrezID) across 5,902 cells.
+The metadata includes information regarding the enzyme used for reverse transcription, whether the sample was isolates from lymph nodes or is a primary tumor, whether the cell is classified as tumor or normal and the type of normal cell, according to Puram et. al\cite{Puram2017}.
+To reduce execution time, we will limit the analysis in this vignette to a subset of 500 cells, selected uniformly at random---we sfix the random seed for reproducibility purposes---from the 5,902 represented in the dataset.
+
+<<echo=TRUE, results=verbatim>>==
+tpm_matrix <- assays(dset)$TPM
+set.seed(1)
+pos <- sample(ncol(tpm_matrix), 500)
+tpm_matrix <- tpm_matrix[, pos]
+metadata <- colData(dset)
 @
 
 The association between gene expression and loci-blocks is estimated by the function \texttt{inferCNV()}.
@@ -220,6 +234,9 @@ lines(c(rep(cnv_norm$gis[pos5], 2), max(cnv_norm$gis*1.05)),
 The distribution for the GIS based on the original classification of the cells by Puram et.al \cite{Puram2017} can be displayed over this last plot with the following code (Fig. \ref{fig:liNormClass}):
 
 <<label=fitClass, fig=TRUE, include=FALSE, echo=TRUE, width=6, height=4>>=
+metadata_tumor <- as.vector(metadata$classified..as.cancer.cell)[match(colnames(tpm_matrix),
+    rownames(metadata))]
+metadata_tumor <- as.logical(as.numeric(metadata_tumor))
 # Plotting the density distribution for GIS and fitted models
 par(mai=c(.8, .8, .2, .8))
 giDensityPlot(cnv_norm, ylim=c(0, 1.1))

@@ -74,7 +74,11 @@ skip = 25) {
 #' and parameters (param), including species, window (k) and skip
 #'
 #' @examples
-#' data(GSE103322, package='HNSCgenomicInstability')
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
 #' class(cnv)
 #' names(cnv)
@@ -114,8 +118,7 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         stop(paste0("No geneset with at least ", min_geneset, " genes"))
     # Enrichment for the expmat
     if (verbose)
-        message("Computing the enrichment for the genesets in the expression
-            matrix")
+        message("Computing the enrichment for the genesets in the expression matrix")
     expmat_nes <- sREA(expmat, geneset)
     # Enrichment of the null model
     nullnes <- NULL  # Initialize the null nes variable
@@ -153,7 +156,11 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
 #'
 #' @examples
 #'
-#' data(GSE103322, package='HNSCgenomicInstability')
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
 #' cnv <- genomicInstabilityScore(cnv)
 #' plot(density(cnv$gis))
@@ -198,7 +205,11 @@ genomicInstabilityScore <- function(cnv, likelihood = FALSE) {
 #'
 #' @examples
 #'
-#' data(GSE103322, package='HNSCgenomicInstability')
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
 #' cnv <- genomicInstabilityScore(cnv)
 #' cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)

@@ -11,7 +11,8 @@ Depends:
     R (>= 4.0.0),
     checkmate
 Suggests:
-    HNSCgenomicInstability,
+    SingleCellExperiment,
+    ExperimentHub,
     pROC
 Imports:
     mixtools
@@ -30,3 +31,4 @@ URL: https://github.com/DarwinHealth/genomicInstability
 BugReports: https://github.com/DarwinHealth/genomicInstability
 Encoding: UTF-8
 ARoxygenNote: 7.1.1
+RoxygenNote: 7.1.1

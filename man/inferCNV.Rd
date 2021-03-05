@@ -15,28 +15,36 @@ inferCNV(
 )
 }
 \arguments{
-\item{expmat}{Matrix of gene expression profiles or signatures with genes (entrezID) in rows and samples in columns}
+\item{expmat}{Matrix of gene expression profiles or signatures with genes
+'(entrezID) in rows and samples in columns}
 
-\item{nullmat}{Optional matrix with same number of rows as \code{expmat} to be used as null model}
+\item{nullmat}{Optional matrix with same number of rows as \code{expmat} to
+be used as null model}
 
 \item{species}{Character string indicating the species, either human or mouse}
 
 \item{k}{Integer indicating the number of genes per set}
 
-\item{skip}{Interger indicating the displacement of the window for selecting the k genes}
+\item{skip}{Interger indicating the displacement of the window for selecting
+the k genes}
 
 \item{min_geneset}{Integer indicating the minimum size for the genesets}
 
 \item{verbose}{Logical, whether progress should be reported}
 }
 \value{
-Object of class inferCNV, which is a list containing matrix of nes, and parameters (param), including species, window (k) and skip
+Object of class inferCNV, which is a list containing matrix of nes,
+and parameters (param), including species, window (k) and skip
 }
 \description{
 This function estimates the CNV score based on expression data
 }
 \examples{
-data(GSE103322, package="HNSCgenomicInstability")
+eh <- ExperimentHub::ExperimentHub()
+dset <- eh[["EH5419"]]
+tpm_matrix <- assays(dset)$TPM
+set.seed(1)
+tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 cnv <- inferCNV(tpm_matrix)
 class(cnv)
 names(cnv)

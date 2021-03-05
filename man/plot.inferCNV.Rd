@@ -11,7 +11,8 @@
 
 \item{output}{Optional output PDF file name (with extension)}
 
-\item{threshold}{Likelihood threshold for identifying genomically inestable cells/samples, 0 disables this filter}
+\item{threshold}{Likelihood threshold for identifying genomically inestable
+cells/samples, 0 disables this filter}
 
 \item{gamma}{Number indicating the gamma transformation for the colors}
 
@@ -27,15 +28,20 @@ This function generates a chromosomes map plot for the inferred CNVs
 }
 \examples{
 
-data(GSE103322, package="HNSCgenomicInstability")
+eh <- ExperimentHub::ExperimentHub()
+dset <- eh[["EH5419"]]
+tpm_matrix <- assays(dset)$TPM
+set.seed(1)
+tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 cnv <- inferCNV(tpm_matrix)
 cnv <- genomicInstabilityScore(cnv)
 cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
-\donttest{plot(cnv, output="test.png")}
+\donttest{plot(cnv, output='test.png')}
 
 }
 \seealso{
-[giLikelihood()] to estimate the relative likelihood, [genomicInstabilityScore()] to estimate
-the genomic instability score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+[giLikelihood()] to estimate the relative likelihood,
+[genomicInstabilityScore()] to estimate the genomic instability score for
+each cell in the dataset, and [inferCNV()] to infer the enrichment
 of loci-blocks in the gene expression data.
 }

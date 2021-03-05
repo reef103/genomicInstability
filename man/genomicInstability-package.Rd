@@ -6,20 +6,43 @@
 \alias{genomicInstability-package}
 \title{genomicInstability: Genomic Instability estimation for scRNA-Seq}
 \description{
-This package contain functions to run genomic instability analysis from scRNA-Seq.
+This package contain functions to run genomic instability analysis (GIA)
+    from scRNA-Seq data.
+    GIA estimates the association between gene expression and genomic location
+    of the coding genes.
+    It uses the aREA algorithm to quantify the enrichment of sets of
+    contiguous genes (loci-blocks) on the gene expression profiles and
+    estimates the Genomic Instability Score (GIS) for each analyzed cell.
 }
 \details{
-The basic functionality of this package can be performed by inferCNV(), to infer the enrichment
-of loci-blocks on gene expresion; genomicInstabilityScore(), to estimate the genomic instability
-for each of the cells in the scRNASeq dataset; giLikelihood(), to estimate the relative likelihood
-for each cell to be normal (low genomic instability) or tumor (high genomic instability); plot()
-and giDensityPlot() to plot the scores per loci-block and the distribution of the genomic
-instability score, respectively.
+The basic functionality of this package can be performed by inferCNV(),
+to infer the enrichment of loci-blocks on gene expresion;
+genomicInstabilityScore(), to estimate the genomic instability
+for each of the cells in the scRNASeq dataset; giLikelihood(), to estimate
+the relative likelihood for each cell to be normal (low genomic instability)
+or tumor (high genomic instability); plot() and giDensityPlot() to plot the
+scores per loci-block and the distribution of the genomic instability score,
+respectively.
 }
 \seealso{
-[inferCNV()] for estimating loci-block enrichment, [genomicInstabilityScore()] for estimating
-the genomic instability of each cell in the dataset, [giLikelihood()] for estimating the relative
-likelihood for the cells to be normal or neoplastic, [plot.inferCNV()] and [giDensityPlot()] to plot
-the results.
+[inferCNV()] for estimating loci-block enrichment,
+[genomicInstabilityScore()] for estimating the genomic instability of each
+cell in the dataset, [giLikelihood()] for estimating the relative
+likelihood for the cells to be normal or neoplastic, [plot.inferCNV()] and
+[giDensityPlot()] to plot the results.
+}
+\author{
+\strong{Maintainer}: Mariano Alvarez \email{reef103@gmail.com}
+
+Authors:
+\itemize{
+  \item Pasquale Laise \email{plaise@darwinhealth.com}
+}
+
+Other contributors:
+\itemize{
+  \item DarwinHealth [copyright holder]
+}
+
 }
 \keyword{internal}

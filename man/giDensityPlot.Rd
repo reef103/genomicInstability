@@ -9,7 +9,8 @@ giDensityPlot(inferCNV, legend = c("topleft", "top", "topright", "none"), ...)
 \arguments{
 \item{inferCNV}{Object of class inferCNV}
 
-\item{legend}{Character string indicating the location of the legend. none to not include it}
+\item{legend}{Character string indicating the location of the legend. none
+to not include it}
 
 \item{...}{Additional parameters for plot()}
 }
@@ -17,11 +18,16 @@ giDensityPlot(inferCNV, legend = c("topleft", "top", "topright", "none"), ...)
 None, a figure is created in the default output device
 }
 \description{
-This function plot the genomic instability distribution, gaussian fits and null distribution if available
+This function plot the genomic instability distribution, gaussian fits and
+null distribution if available
 }
 \examples{
 
-data(GSE103322, package="HNSCgenomicInstability")
+eh <- ExperimentHub::ExperimentHub()
+dset <- eh[["EH5419"]]
+tpm_matrix <- assays(dset)$TPM
+set.seed(1)
+tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 cnv <- inferCNV(tpm_matrix)
 cnv <- genomicInstabilityScore(cnv)
 cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
@@ -29,7 +35,8 @@ giDensityPlot(cnv)
 
 }
 \seealso{
-[giLikelihood()] to estimate the relative likelihood, [genomicInstabilityScore()] to estimate
-the genomic instability score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+[giLikelihood()] to estimate the relative likelihood,
+[genomicInstabilityScore()] to estimate the genomic instability score for
+each cell in the dataset, and [inferCNV()] to infer the enrichment
 of loci-blocks in the gene expression data.
 }

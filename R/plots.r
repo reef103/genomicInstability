@@ -14,7 +14,11 @@
 #'
 #' @examples
 #'
-#' data(GSE103322, package='HNSCgenomicInstability')
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
 #' cnv <- genomicInstabilityScore(cnv)
 #' cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
@@ -64,7 +68,11 @@ giDensityPlot <- function(inferCNV, legend = c("topleft", "top", "topright",
 #'
 #' @examples
 #'
-#' data(GSE103322, package='HNSCgenomicInstability')
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 #' cnv <- inferCNV(tpm_matrix)
 #' cnv <- genomicInstabilityScore(cnv)
 #' cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)

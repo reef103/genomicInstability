@@ -17,11 +17,15 @@ giLikelihood(
 
 \item{recompute}{Logical, whether the model fits should be re-computed}
 
-\item{distros}{Vector of 2 integers indicating the minimum and maximum number of Gaussian models to fit}
+\item{distros}{Vector of 2 integers indicating the minimum and maximum number
+of Gaussian models to fit}
 
-\item{tumor}{Optional vector of integers indicating the Gaussians considered as tumors}
+\item{tumor}{Optional vector of integers indicating the Gaussians considered
+as tumors}
 
-\item{normal}{Optional vector of integers indicating the Gaussians considered as normal. This is only useful when no null model has been provided for the analysis}
+\item{normal}{Optional vector of integers indicating the Gaussians considered
+as normal. This is only useful when no null model has been provided for the
+analysis}
 }
 \value{
 Updated inferCNV-class object with gi_likelihood slot
@@ -31,7 +35,11 @@ This function computes the genomic instability likelihood
 }
 \examples{
 
-data(GSE103322, package="HNSCgenomicInstability")
+eh <- ExperimentHub::ExperimentHub()
+dset <- eh[["EH5419"]]
+tpm_matrix <- assays(dset)$TPM
+set.seed(1)
+tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
 cnv <- inferCNV(tpm_matrix)
 cnv <- genomicInstabilityScore(cnv)
 cnv <- giLikelihood(cnv, distros=c(3, 3), tumor=2:3)
@@ -40,7 +48,7 @@ plot(density(cnv$gi_likelihood, from=0, to=1))
 
 }
 \seealso{
-[genomicInstabilityScore()] to estimate the genomic instability score for
-each cell in the dataset, and [inferCNV()] to infer the enrichment of loci-blocks
-in the gene expression data.
+[genomicInstabilityScore()] to estimate the genomic instability
+score for each cell in the dataset, and [inferCNV()] to infer the enrichment
+of loci-blocks in the gene expression data.
 }
