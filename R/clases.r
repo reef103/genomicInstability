@@ -1,6 +1,13 @@
 # Initializationa and dependencies
 
 #' @importFrom mixtools normalmixEM
+#' @importFrom SummarizedExperiment assays
+#' @importFrom checkmate assertInt
+#' @importFrom checkmate assertMatrix
+#' @importFrom checkmate assertLogical
+#' @importFrom checkmate assertIntegerish
+#' @importFrom checkmate assertClass
+#' @importFrom checkmate assertNumeric
 NULL
 
 #' Chromosomal coordinate of human and mouse known genes
