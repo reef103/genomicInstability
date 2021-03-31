@@ -1,5 +1,5 @@
 Package: genomicInstability
-Version: 0.99.1
+Version: 0.99.2
 Date: 2020-02-21
 Title: Genomic Instability estimation for scRNA-Seq
 Authors@R: c(person("Mariano", "Alvarez", role=c("aut", "cre"),
@@ -8,14 +8,15 @@ Authors@R: c(person("Mariano", "Alvarez", role=c("aut", "cre"),
            email="plaise@darwinhealth.com"),
            person("DarwinHealth", role="cph"))
 Depends:
-    R (>= 4.0.0),
+    R (>= 4.1.0),
     checkmate
 Suggests:
     SingleCellExperiment,
     ExperimentHub,
     pROC
 Imports:
-    mixtools
+    mixtools,
+    SummarizedExperiment
 Description:
     This package contain functions to run genomic instability analysis (GIA)
     from scRNA-Seq data.
