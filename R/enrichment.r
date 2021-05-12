@@ -8,9 +8,9 @@ sREA <- function(signatures, groups) {
             dimnames = list(names(signatures), "sample1"))
     # Copula transformation of the signature matrix by colulmns
     sig <- qnorm(apply(signatures, 2, rank)/(nrow(signatures) + 1))
-    gr <- sapply(groups, function(x, samp) {
+    gr <- vapply(groups, function(x, samp) {
         samp %in% x
-    }, samp = rownames(sig))
+    }, logical(length(samp)), samp = rownames(sig))
     gr <- t(gr)
     nn <- rowSums(gr)
     gr <- gr/nn

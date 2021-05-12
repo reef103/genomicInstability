@@ -41,7 +41,8 @@ skip = 25) {
     pos <- unique(c(grep("_alt", names(genes_per_chromosome)),
     grep("_random", names(genes_per_chromosome))))
     # Chromosomes with less than 10 genes
-    pos <- unique(c(pos, which(sapply(genes_per_chromosome, length) < k)))
+    pos <- unique(c(pos, which(vapply(genes_per_chromosome, length,
+                                      numeric(1)) < k)))
     genes_per_chromosome <- genes_per_chromosome[-pos]
     # Genesets per chromosome
     geneset_chromosome <- lapply(genes_per_chromosome, splitVectorWindow, k = k,
@@ -50,8 +51,8 @@ skip = 25) {
     geneset <- unlist(geneset_chromosome, recursive = FALSE, use.names = FALSE)
     # Name the genesets by chromosome-set
     names(geneset) <- paste(rep(names(geneset_chromosome),
-        sapply(geneset_chromosome, length)), unlist(lapply(geneset_chromosome,
-        names), use.names = FALSE), sep = "-")
+        vapply(geneset_chromosome, length, numeric(1))),
+        unlist(lapply(geneset_chromosome, names), use.names = FALSE), sep = "-")
     return(geneset)
 }
 
@@ -113,7 +114,7 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     # filter represented genes
     geneset <- lapply(geneset, keepVectorElements, elements = rownames(expmat))
     # keep genesets with at least min_geneset genes
-    geneset <- geneset[sapply(geneset, length) >= min_geneset]
+    geneset <- geneset[vapply(geneset, length, numeric(1)) >= min_geneset]
     if (length(geneset) == 0)
         stop(paste0("No geneset with at least ", min_geneset, " genes"))
     # Enrichment for the expmat
@@ -129,10 +130,12 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         # Estimating NES
         if (verbose)
             message("Estimating the normalized enrichment scores")
-        expmat_nes <- t(sapply(seq_len(nrow(expmat_nes)),
-            computeNesForMatrixRow, nesmat = expmat_nes, nullmat = expmat_null))
-        nullnes <- t(sapply(seq_len(nrow(expmat_null)), computeNesForMatrixRow,
-            nesmat = expmat_null, nullmat = expmat_null))
+        expmat_nes <- t(vapply(seq_len(nrow(expmat_nes)),
+            computeNesForMatrixRow, numeric(ncol(expmat_nes)),
+            nesmat = expmat_nes, nullmat = expmat_null))
+        nullnes <- t(vapply(seq_len(nrow(expmat_null)), computeNesForMatrixRow,
+            numeric(ncol(expmat_null)), nesmat = expmat_null,
+            nullmat = expmat_null))
         rownames(expmat_nes) <- rownames(nullnes) <- names(geneset)
     }
     # Returning the results

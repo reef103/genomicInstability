@@ -54,7 +54,7 @@ keepVectorElements <- function(x, elements) x[x %in% elements]
 # Vector or Matrix with same number of rows as elements in the input x vector
 # and columns as positions selected
 getElementsFromString <- function(x, sep = "-", pos = 1) {
-    sapply(strsplit(x, sep), subsetVector, pos = pos)
+    vapply(strsplit(x, sep), subsetVector, character(length(pos)), pos = pos)
 }
 
 # Get positions from vector This function returns a slected subset of a vector

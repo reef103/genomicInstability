@@ -118,7 +118,7 @@ plot.inferCNV <- function(x, output = NULL, threshold = 0.2, gamma = 1.5,
                 <= threshold[1], , drop = FALSE]
         }
         # Remove empty matrices
-        nes <- nes[sapply(nes, nrow) > 0]
+        nes <- nes[vapply(nes, nrow, numeric(1)) > 0]
     }
     # Sort matrices by hierarchical cluster
     nes <- lapply(nes, sortRowsByHclust)
@@ -127,9 +127,9 @@ plot.inferCNV <- function(x, output = NULL, threshold = 0.2, gamma = 1.5,
     # Prepare for the plot
     nesplot <- transformNesForPlot(nes, method = "scale")
     # Size of the chromosome blocks
-    chrom_size <- sapply(nes[[1]], ncol)
+    chrom_size <- vapply(nes[[1]], ncol, numeric(1))
     # Size of the groups
-    group_size <- sapply(nes, function(x) nrow(x[[1]]))
+    group_size <- vapply(nes, function(x) nrow(x[[1]]), numeric(1))
     # Figure panels widths and heights
     widths <- chrom_size/100 + 0.02
     widths[1] <- widths[1] + 0.4 - 0.01
@@ -256,9 +256,9 @@ colorScale <- function(x, color = c("royalblue", "firebrick2"), gama = 1,
         x[pos] <- scmax * sign(x[pos])
     x <- abs(x/scmax)^gama * sign(x)
     color <- t(col2rgb(color))
-    col <- sapply(x, function(x, color) {
+    col <- vapply(x, function(x, color) {
         colSums(color * c(abs(x) * (x < 0), 1 - abs(x), x * (x > 0)))
-    }, color = color/255)
+    }, numeric(ncol(color)), color = color/255)
     pos <- which(colSums(is.na(col)) > 0)
     col[is.na(col)] <- 0
     col <- apply(col, 2, function(x, alpha) rgb(x[1], x[2], x[3],

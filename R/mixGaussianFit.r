@@ -16,7 +16,7 @@ getPeaks3 <- function(x, adj = 1.2, thr = 0.01) {
     pos <- which(sp2[-length(sp2)] * sp2[-1] < 0)
     x2 <- (den$x[pos] + den$x[pos + 1])/2
     sp3 <- predict(sp, x2, deriv = 3)$y
-    posi <- sapply(which(sp3 < 0), function(i, x2, posi) {
+    posi <- lapply(which(sp3 < 0), function(i, x2, posi) {
         if (length(x2) < (i + 1))
             return(NULL)
         pos <- which(posi > x2[i] & posi < x2[i + 1])
@@ -24,15 +24,15 @@ getPeaks3 <- function(x, adj = 1.2, thr = 0.01) {
             return((x2[i + 1] + x2[i])/2)
         return(posi[pos[1]])
     }, x2 = x2, posi = getPeaks(x, adj = adj))
-    posi <- unlist(posi[sapply(posi, length) > 0], use.names = FALSE)
-    posi1 <- sapply(which(sp3 > 0), function(i, x2) {
+    posi <- unlist(posi[vapply(posi, length, numeric(1)) > 0], use.names = FALSE)
+    posi1 <- lapply(which(sp3 > 0), function(i, x2) {
         if (length(x2) < (i + 1))
             return(NULL)
         (x2[i] + x2[i + 1])/2
     }, x2 = x2)
-    posi1 <- unlist(posi1[sapply(posi1, length) > 0], use.names = FALSE)
-    posi <- sapply(posi, function(posi, x) which(x > posi)[1], x = den$x)
-    posi1 <- sapply(posi1, function(posi, x) which(x > posi)[1], x = den$x)
+    posi1 <- unlist(posi1[vapply(posi1, length, numeric(1)) > 0], use.names = FALSE)
+    posi <- vapply(posi, function(posi, x) which(x > posi)[1], numeric(1), x = den$x)
+    posi1 <- vapply(posi1, function(posi, x) which(x > posi)[1], numeric(1), x = den$x)
     m <- sort(den$x[posi])
     if (length(posi1) == 0) {
         b <- c(min(den$x) - diff(range(den$x)), max(den$x) + diff(range(den$x)))
@@ -40,7 +40,7 @@ getPeaks3 <- function(x, adj = 1.2, thr = 0.01) {
         b <- c(min(den$x) - diff(range(den$x)), sort(den$x[posi1]),
                 max(den$x) + diff(range(den$x)))
     }
-    sigma <- sapply(m, function(x, den, b) {
+    sigma <- vapply(m, function(x, den, b) {
         ymax <- approx(den, xout = x)$y
         x1 <- den$x[den$y < (ymax/2)]
         dd <- x1 - x
@@ -62,13 +62,13 @@ getPeaks3 <- function(x, adj = 1.2, thr = 0.01) {
         if (length(res) == 0)
             res <- NA
         res
-    }, den = den, b = b)
-    lambda <- sapply(seq_len(length(m)), function(i, m, sigma, den) {
+    }, numeric(1), den = den, b = b)
+    lambda <- vapply(seq_len(length(m)), function(i, m, sigma, den) {
         if (is.na(sigma[i]))
             return(NA)
         x2 <- seq(m[i] - sigma[i], m[i] + sigma[i], length = 100)
         integrateTZ(x2, approx(den, xout = x2)$y)
-    }, m = m, sigma = sigma, den = den)
+    }, numeric(1), m = m, sigma = sigma, den = den)
     lambda[is.na(lambda)] <- 0
     lambda <- lambda/sum(lambda)
     pos <- which(lambda > thr)
@@ -111,9 +111,9 @@ mixGaussianFit <- function(x, thr = 0.01, min = 1, max = 1e+06, adj = c(0.8, 2))
             param <- lapply(param, function(x, pos) x[-pos], pos = pos)
             suppressMessages(fit <- normalmixEM(x, lambda = param$lambda,
                 mu = param$m, sd = param$sigma, epsilon = 1e-50))
-            ye <- sapply(seq_len(length(fit$lambda)), function(i, x, fit) {
+            ye <- vapply(seq_len(length(fit$lambda)), function(i, x, fit) {
                 dnorm(x, fit$mu[i], fit$sigma[i]) * fit$lambda[i]
-            }, x = den$x, fit = fit)
+            }, numeric(length(den$x)), x = den$x, fit = fit)
             if (is.null(dim(ye)))
                 ye <- matrix(ye, length(ye), 1)
             mse <- mean((rowSums(ye) - den$y)^2)
@@ -122,10 +122,10 @@ mixGaussianFit <- function(x, thr = 0.01, min = 1, max = 1e+06, adj = c(0.8, 2))
         list(mu = fit$mu, sigma = fit$sigma, lambda = fit$lambda,
             loglik = fit$loglik, mse = mse)
     }, x = x, thr = thr, den = density(x, n = 512 * 20), min = min, max = max)
-    fit <- fit[sapply(fit, length) > 0]
+    fit <- fit[vapply(fit, length, numeric(1)) > 0]
     if (length(fit) == 0)
         stop("No sucessful filt with provided parameters", call. = FALSE)
-    mse <- sapply(fit, function(x) x$mse)
+    mse <- vapply(fit, function(x) x$mse, numeric(1))
     mse[!is.finite(mse)] <- 1e+06
     res <- fit[[which.min(mse)]]
     class(res) <- "mgfit"
@@ -151,8 +151,8 @@ predict.mgfit <- function(fit, x, k = NULL) {
     # Check there are still usable k
     if (length(k) == 0)
         stop("Selected gaussians not present in the fit object", call. = FALSE)
-    prob_density <- sapply(seq_len(length(fit$mu)), function(i, x, fit)
-        dnorm(x, fit$mu[i], fit$sigma[i]), x = x, fit = fit)
+    prob_density <- vapply(seq_len(length(fit$mu)), function(i, x, fit)
+        dnorm(x, fit$mu[i], fit$sigma[i]), numeric(length(x)), x = x, fit = fit)
     prob_density <- prob_density/rowSums(prob_density)
     colnames(prob_density) <- seq_len(ncol(prob_density))
     return(prob_density[, k, drop = FALSE])
