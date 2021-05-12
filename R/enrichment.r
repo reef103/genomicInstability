@@ -65,8 +65,8 @@ aecdf1 <- function(dnull, symmetric = FALSE, x, alternative = c("two.sided",
         stop("Not enough permutations to compute NULL distribution",
             call. = FALSE)
     fit1 <- lm(y ~ 0 + x, data = a1)
-    a1 <- list(x = a$x[length(a$x) - (15:4)] - iqr[3], y = log(1 - pd(iqr[3])) -
-        log(1 - a$y[length(a$x) - (15:4)]))
+    a1 <- list(x = a$x[length(a$x) - (15:4)] - iqr[3],
+               y = log(1 - pd(iqr[3])) - log(1 - a$y[length(a$x) - (15:4)]))
     a1 <- lapply(a1, function(x, pos) x[pos], pos = which(is.finite(a1$y)))
     if (length(a1$x) < 3)
         stop("Not enough permutations to compute NULL distribution",

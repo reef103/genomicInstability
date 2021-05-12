@@ -24,15 +24,19 @@ getPeaks3 <- function(x, adj = 1.2, thr = 0.01) {
             return((x2[i + 1] + x2[i])/2)
         return(posi[pos[1]])
     }, x2 = x2, posi = getPeaks(x, adj = adj))
-    posi <- unlist(posi[vapply(posi, length, numeric(1)) > 0], use.names = FALSE)
+    posi <- unlist(posi[vapply(posi, length, numeric(1)) > 0],
+                   use.names = FALSE)
     posi1 <- lapply(which(sp3 > 0), function(i, x2) {
         if (length(x2) < (i + 1))
             return(NULL)
         (x2[i] + x2[i + 1])/2
     }, x2 = x2)
-    posi1 <- unlist(posi1[vapply(posi1, length, numeric(1)) > 0], use.names = FALSE)
-    posi <- vapply(posi, function(posi, x) which(x > posi)[1], numeric(1), x = den$x)
-    posi1 <- vapply(posi1, function(posi, x) which(x > posi)[1], numeric(1), x = den$x)
+    posi1 <- unlist(posi1[vapply(posi1, length, numeric(1)) > 0],
+                    use.names = FALSE)
+    posi <- vapply(posi, function(posi, x) which(x > posi)[1], numeric(1),
+                   x = den$x)
+    posi1 <- vapply(posi1, function(posi, x) which(x > posi)[1], numeric(1),
+                    x = den$x)
     m <- sort(den$x[posi])
     if (length(posi1) == 0) {
         b <- c(min(den$x) - diff(range(den$x)), max(den$x) + diff(range(den$x)))

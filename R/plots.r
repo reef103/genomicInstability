@@ -43,7 +43,7 @@ giDensityPlot <- function(inferCNV, legend = c("topleft", "top", "topright",
         ...)
     if (!is.null(inferCNV[["gisnull"]])) {
         dnull <- density(inferCNV[["gisnull"]], na.rm = TRUE, adj = 2)
-        dnull$y <- dnull$y * max(density(inferCNV[["gis"]], na.rm = TRUE)$y) /
+        dnull$y <- dnull$y * max(density(inferCNV[["gis"]],na.rm = TRUE)$y) /
             max(dnull$y)
         lines(dnull, lwd = 2)
         if (legend != "none")
