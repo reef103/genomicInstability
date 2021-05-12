@@ -10,7 +10,7 @@ sREA <- function(signatures, groups) {
     sig <- qnorm(apply(signatures, 2, rank)/(nrow(signatures) + 1))
     gr <- vapply(groups, function(x, samp) {
         samp %in% x
-    }, logical(length(samp)), samp = rownames(sig))
+    }, logical(nrow(sig)), samp = rownames(sig))
     gr <- t(gr)
     nn <- rowSums(gr)
     gr <- gr/nn
