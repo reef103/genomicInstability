@@ -1,5 +1,5 @@
 Package: genomicInstability
-Version: 1.2.0
+Version: 1.3.0
 Date: 2020-02-21
 Title: Genomic Instability estimation for scRNA-Seq
 Authors@R: c(person("Mariano", "Alvarez", role=c("aut", "cre"),
