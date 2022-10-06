@@ -113,8 +113,8 @@ mixGaussianFit <- function(x, thr = 0.01, min = 1, max = 1e+06, adj = c(0.8, 2))
         while (any(param$lambda < thr)) {
             pos <- which(param$lambda < thr)
             param <- lapply(param, function(x, pos) x[-pos], pos = pos)
-            suppressMessages(fit <- normalmixEM(x, lambda = param$lambda,
-                mu = param$m, sd = param$sigma, epsilon = 1e-50))
+            suppressMessages(invisible(capture.output(fit <- normalmixEM(x, lambda = param$lambda,
+                mu = param$m, sd = param$sigma, epsilon = 1e-50))))
             ye <- vapply(seq_len(length(fit$lambda)), function(i, x, fit) {
                 dnorm(x, fit$mu[i], fit$sigma[i]) * fit$lambda[i]
             }, numeric(length(den$x)), x = den$x, fit = fit)
