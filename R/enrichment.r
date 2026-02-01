@@ -3,9 +3,15 @@
 
 sREA <- function(signatures, groups) {
     # Check signatures is a matrix
-    if (is.null(nrow(signatures)))
+    if (is.null(nrow(signatures))) {
         signatures <- matrix(signatures, length(signatures), 1,
             dimnames = list(names(signatures), "sample1"))
+    }
+    if (ncol(signatures)>1000) {
+        res <- lapply(splitMatrixByColumns(signatures), sREA, groups=groups)
+        res <- concatenateMatrixList(res)
+        return(res)
+    }
     # Copula transformation of the signature matrix by colulmns
     sig <- qnorm(apply(signatures, 2, rank)/(nrow(signatures) + 1))
     gr <- vapply(groups, function(x, samp) {
@@ -120,6 +126,28 @@ aecdf1 <- function(dnull, symmetric = FALSE, x, alternative = c("two.sided",
 
 computeNesForMatrixRow <- function(i, nesmat, nullmat) {
     aecdf1(nullmat[i, ], x = nesmat[i, ])$nes
+}
+
+#' Split Matrix By Columns
+#' 
+#' This function split a based on the number of columns and returns a list of matrices
+#' 
+#' @param x Matrix
+#' @param n Integer indicating the maximum column number for the pieces of the matrix
+#' 
+#' @return List of matrices
+splitMatrixByColumns <- function(x, n=1000) {
+    checkmate::assertMatrix(x)
+    checkmate::assertIntegerish(n, lower=1, upper=Inf)
+    if (ncol(x)<=n) {
+        return(list(x))
+    }
+    spn <- ceiling(ncol(x)/n)
+    pos <- round(seq(1, ncol(x), length=spn+1))
+    pos <- cbind(pos[-length(pos)], c(pos[-c(1, length(pos))]-1, pos[length(pos)]))
+    lapply(seq_len(nrow(pos)), function(i, pos, x) {
+        x[, pos[i, 1]:pos[i, 2], drop=FALSE]
+    }, pos=pos, x=x)
 }
 
 #' Integrate list of matrices
