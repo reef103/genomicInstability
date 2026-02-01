@@ -18,6 +18,35 @@ sREA <- function(signatures, groups) {
     return(es * sqrt(nn))
 }
 
+sREAsm <- function(signatures, groups, m1 = 0, sd1 = 1, batch_size = 1000) {
+    # Check signatures is a matrix
+    if (is.null(nrow(signatures)))
+        signatures <- matrix(signatures, length(signatures), 1,
+            dimnames = list(names(signatures), "sample1"))
+    # Preparing groups
+    gr <- vapply(groups, function(x, samp) {
+        samp %in% x
+    }, logical(nrow(signatures)), samp = rownames(signatures))
+    gr <- t(gr)
+    nn <- rowSums(gr)
+    gr <- gr / nn
+    # Computing enrichment
+    k <- ceiling(ncol(signatures) / batch_size)
+    if (k > 1) {
+        pos <- cut(seq_len(ncol(signatures)), breaks = k, labels = FALSE)
+    } else {
+        pos <- rep(1, ncol(signatures))
+    }
+    es <- tapply(seq_len(ncol(signatures)), pos, function(i, x, m1, sd1, gr) {
+        sig <- matrix(qnorm(apply((x[, i, drop = FALSE] - m1) / sd1, 2,
+            rank) / (nrow(x) + 1)), nrow(x), length(i),
+            dimnames = list(rownames(x), colnames(x)[i]))
+            gr %*% sig
+    }, x = signatures, m1 = m1, sd1 = sd1, gr = gr)
+    return(concatenateMatrixList(es) * sqrt(nn))
+}
+
+
 aecdf1 <- function(dnull, symmetric = FALSE, x, alternative = c("two.sided",
     "greater", "less")) {
     dnull <- dnull[is.finite(dnull)]
@@ -91,4 +120,36 @@ aecdf1 <- function(dnull, symmetric = FALSE, x, alternative = c("two.sided",
 
 computeNesForMatrixRow <- function(i, nesmat, nullmat) {
     aecdf1(nullmat[i, ], x = nesmat[i, ])$nes
+}
+
+#' Integrate list of matrices
+#' 
+#' @param x List of matrices
+#' @return Matrix
+concatenateMatrixList <- function(x, method=c("union", "intersection")) {
+    # Check argument
+    checkmate::assertList(x, types="matrix")
+    method <- match.arg(method)
+    switch(method,
+           union={genes <- unique(unlist(lapply(x, rownames), use.names=FALSE))},
+           intersection={
+               genes <- table(unlist(lapply(x, rownames), use.names=FALSE))
+               genes <- names(genes)[genes==max(genes)]
+           })
+    do.call(cbind, lapply(x, matrixOrderRowsByName, names=genes))
+}
+
+#' Matrix order rows by name
+#' 
+#' @param x Matrix
+#' @param names Vector of strings
+#' @return Matrix with ordered rows
+matrixOrderRowsByName <- function(x, names) {
+    # Assert arguments
+    checkmate::assertMatrix(x, mode="numeric", row.names="named")
+    checkmate::assertCharacter(names, min.len=1, any.missing=FALSE, min.chars=1)
+    # Order
+    x <- x[match(names, rownames(x)), , drop=FALSE]
+    rownames(x) <- names
+    return(x)
 }

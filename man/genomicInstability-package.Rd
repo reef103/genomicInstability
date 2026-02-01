@@ -6,13 +6,7 @@
 \alias{genomicInstability-package}
 \title{genomicInstability: Genomic Instability estimation for scRNA-Seq}
 \description{
-This package contain functions to run genomic instability analysis (GIA)
-    from scRNA-Seq data.
-    GIA estimates the association between gene expression and genomic location
-    of the coding genes.
-    It uses the aREA algorithm to quantify the enrichment of sets of
-    contiguous genes (loci-blocks) on the gene expression profiles and
-    estimates the Genomic Instability Score (GIS) for each analyzed cell.
+This package contain functions to run genomic instability analysis (GIA) from scRNA-Seq data. GIA estimates the association between gene expression and genomic location of the coding genes. It uses the aREA algorithm to quantify the enrichment of sets of contiguous genes (loci-blocks) on the gene expression profiles and estimates the Genomic Instability Score (GIS) for each analyzed cell.
 }
 \details{
 The basic functionality of this package can be performed by inferCNV(),

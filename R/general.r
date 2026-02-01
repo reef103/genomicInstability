@@ -36,6 +36,19 @@ rowVars <- function(x) {
     return(res[, 1])
 }
 
+# Variance of rows for sparse matrices with NA values This function computes the variance
+# by rows ignoring NA values @param x Numeric matrix @return Vector with the
+# variance by row results
+rowVarsSM <- function(x) {
+    ave <- Matrix::rowMeans(x, na.rm = TRUE)
+    pos <- which(is.na(x))
+    largo <- Matrix::rowSums(!is.na(x))
+    x[pos] <- rep(ave, ncol(x))[pos]
+    res <- (x - ave)^2 %*% rep(1, ncol(x))/(largo - 1)
+    return(res[, 1])
+}
+
+
 # Variance of columns for arrays with NA values This function computes the
 # variance by columns ignoring NA values @param x Numeric matrix @return Vector
 # with the variance by column results
@@ -87,4 +100,20 @@ validateInferCNV <- function(x, slots = "nes") {
         checkmate::assertMatrix(x[["nes"]], mode = "numeric",
             all.missing = FALSE,  min.rows = 1, min.cols = 1,
             row.names = "named", col.names = "named")
+}
+
+#' Counts per million implementation for sparse matrices
+#' 
+#' @param x Numeric sparse matrix
+#' 
+#' @return sparse matrix of CPM
+#' @export
+cpm <- function(x) {
+    checkmate::assert(testMatrix(x), testClass(x, "Matrix"))
+    col_sum <- Matrix::colSums(x, na.rm = TRUE)
+    f <- Matrix::sparseMatrix(i = seq_len(length(col_sum)),
+        j = seq_len(length(col_sum)), x = 1e+06 / col_sum)
+    res <- x %*% f
+    colnames(res) <- colnames(x)
+    return(res)
 }

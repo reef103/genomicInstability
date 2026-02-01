@@ -108,6 +108,111 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         nullmat <- nullmat[match(genes, rownames(nullmat)), , drop = FALSE]
     }
     # Generate genesets
+    if (verbose) {
+        message("Generating the genesets from the genome information")
+    }
+    geneset <- generateChromosomeGeneSet(species, k = k, skip = skip)
+    # filter represented genes
+    geneset <- lapply(geneset, keepVectorElements, elements = rownames(expmat))
+    # keep genesets with at least min_geneset genes
+    geneset <- geneset[vapply(geneset, length, numeric(1)) >= min_geneset]
+    if (length(geneset) == 0) {
+        stop(paste0("No geneset with at least ", min_geneset, " genes"))
+    }
+    genes <- unique(unlist(geneset, use.names = FALSE))
+    # Enrichment for the expmat
+    if (verbose) {
+        message("Computing the enrichment for the genesets in the expression matrix")
+    }
+    expmat <- expmat[rownames(expmat) %in% genes, , drop = FALSE]
+    expmat_nes <- sREA(expmat, geneset)
+    # Enrichment of the null model
+    nullnes <- NULL  # Initialize the null nes variable
+    if (!is.null(nullmat)) {
+        if (verbose) {
+            message("Computing null model")
+        }
+        nullmat <- nullmat[rownames(nullmat) %in% genes, , drop = FALSE]
+        expmat_null <- sREA(nullmat, geneset)
+        # Estimating NES
+        if (verbose) {
+            message("Estimating the normalized enrichment scores")
+        }
+        expmat_nes <- t(vapply(seq_len(nrow(expmat_nes)),
+            computeNesForMatrixRow, numeric(ncol(expmat_nes)),
+            nesmat = expmat_nes, nullmat = expmat_null))
+        nullnes <- t(vapply(seq_len(nrow(expmat_null)), computeNesForMatrixRow,
+            numeric(ncol(expmat_null)), nesmat = expmat_null,
+            nullmat = expmat_null))
+        rownames(expmat_nes) <- rownames(nullnes) <- names(geneset)
+    }
+    # Returning the results
+    res <- list(nes = expmat_nes, null = nullnes,
+        param = list(species = species, k = k, skip = skip))
+    class(res) <- "inferCNV"
+    return(res)
+}
+
+#' Inference of CNV from single-cell sparse raw-count matices
+#'
+#' This function estimates the CNV score based on single-cell expression data
+#'
+#' @param expmat Sparse matrix of raw-counts
+#' @param nullmat Optional sparse matrix with same number of rows as
+#' \code{expmat} to be used as null model
+#' @param species Character string indicating the species, either human or mouse
+#' @param k Integer indicating the number of genes per set
+#' @param skip Interger indicating the displacement of the window for selecting
+#' the k genes
+#' @param min_geneset Integer indicating the minimum size for the genesets
+#' @param center Logical, whether to subtract the mean expression of each gene
+#' @param scale Logical, whether to divide by each gene standard deviation
+#' @param batch_size Number indicating the maximum ize of the batch of cells
+#' to be analyzed by aREA per iteration. This parameter is used to limit
+#' memory load when transforming the sparse matrix normalized expression into
+#' full matrix ranked signature
+#' @param verbose Logical, whether progress should be reported
+#'
+#' @return Object of class inferCNV, which is a list containing matrix of nes,
+#' and parameters (param), including species, window (k) and skip
+#'
+#' @examples
+#' eh <- ExperimentHub::ExperimentHub()
+#' dset <- eh[["EH5419"]]
+#' tpm_matrix <- SummarizedExperiment::assays(dset)$TPM
+#' set.seed(1)
+#' tpm_matrix <- tpm_matrix[, sample(ncol(tpm_matrix), 500)]
+#' cnv <- inferCNV(tpm_matrix)
+#' class(cnv)
+#' names(cnv)
+#' cnv$nes[1:5, 1:3]
+#'
+#' @export
+inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
+    k = 100, skip = 25, min_geneset = 10, center = TRUE, scale = FALSE,
+    batch_size = 1000, verbose = TRUE) {
+    # Check values for species
+    species <- match.arg(species)
+    # Validate input
+    checkmate::assertClass(expmat, "Matrix")
+    checkmate::assertClass(nullmat, "Matrix", null.ok = TRUE)
+    checkmate::assertInt(k, lower = 10, upper = 1000)
+    checkmate::assertInt(skip, lower = 1, upper = k)
+    checkmate::assertInt(min_geneset, lower = 2, upper = k)
+    checkmate::assertFlag(center)
+    checkmate::assertFlag(scale)
+    checkmate::assertNumber(batch_size, lower = 1, upper = Inf)
+    checkmate::assertLogical(verbose, len = 1)
+    batch_size <- round(batch_size)
+    # Compatibilize null model
+    if (!is.null(nullmat)) {
+        genes <- intersect(rownames(expmat), rownames(nullmat))
+        if (length(genes) < 100)
+            stop("Genes in expmat and nullmat do not match")
+        expmat <- expmat[match(genes, rownames(expmat)), , drop = FALSE]
+        nullmat <- nullmat[match(genes, rownames(nullmat)), , drop = FALSE]
+    }
+    # Generate genesets
     if (verbose)
         message("Generating the genesets from the genome information")
     geneset <- generateChromosomeGeneSet(species, k = k, skip = skip)
@@ -115,21 +220,43 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     geneset <- lapply(geneset, keepVectorElements, elements = rownames(expmat))
     # keep genesets with at least min_geneset genes
     geneset <- geneset[vapply(geneset, length, numeric(1)) >= min_geneset]
-    if (length(geneset) == 0)
+    if (length(geneset) == 0) {
         stop(paste0("No geneset with at least ", min_geneset, " genes"))
+    }
+    genes <- unique(unlist(geneset, use.names = FALSE))
+    # Normalizing the gene expression
+    expmat <- cpm(expmat)
+    expmat@x <- log2(expmat@x + 1)
     # Enrichment for the expmat
     if (verbose)
         message("Computing the enrichment for the genesets in the expression matrix")
-    expmat_nes <- sREA(expmat, geneset)
+    expmat <- expmat[rownames(expmat) %in% genes, , drop = FALSE]
+    m1 <- 0
+    sd1 <- 1
+    if (center) {
+        m1 <- Matrix::rowMeans(expmat, na.rm = TRUE)
+    }
+    if (scale) {
+        sd1 <- sqrt(rowVarsSM(expmat))
+    }
+    expmat_nes <- sREAsm(expmat, geneset, m1 = m1, sd1 = sd1,
+        batch_size = batch_size)
     # Enrichment of the null model
     nullnes <- NULL  # Initialize the null nes variable
     if (!is.null(nullmat)) {
-        if (verbose)
+        if (verbose) {
             message("Computing null model")
-        expmat_null <- sREA(nullmat, geneset)
+        }
+    # Normalizing the gene expression
+        nullmat <- cpm(nullmat)
+        nullmat@x <- log2(nullmat@x + 1)
+        nullmat <- nullmat[rownames(nullmat) %in% genes, , drop = FALSE]
+        expmat_null <- sREAsm(nullmat, geneset, m1 = m1, sd1 = sd1,
+            batch_size = batch_size)
         # Estimating NES
-        if (verbose)
+        if (verbose) {
             message("Estimating the normalized enrichment scores")
+        }
         expmat_nes <- t(vapply(seq_len(nrow(expmat_nes)),
             computeNesForMatrixRow, numeric(ncol(expmat_nes)),
             nesmat = expmat_nes, nullmat = expmat_null))
