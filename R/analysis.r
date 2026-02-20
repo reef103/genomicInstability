@@ -231,13 +231,22 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     if (verbose)
         message("Computing the enrichment for the genesets in the expression matrix")
     expmat <- expmat[rownames(expmat) %in% genes, , drop = FALSE]
+    ref <- expmat
+    if (length(nullmat) > 0) {
+        nullmat <- cpm(nullmat)
+        nullmat@x <- log2(nullmat@x + 1)
+        genes <- intersect(rownames(expmat), rownames(nullmat))
+        expmat <- expmat[match(genes, rownames(expmat)), , drop = FALSE]
+        nullmat <- nullmat[match(genes, rownames(nullmat)), , drop = FALSE]
+        ref <- nullmat
+    }
     m1 <- 0
     sd1 <- 1
     if (center) {
-        m1 <- Matrix::rowMeans(expmat, na.rm = TRUE)
+        m1 <- Matrix::rowMeans(ref, na.rm = TRUE)
     }
     if (scale) {
-        sd1 <- sqrt(rowVarsSM(expmat))
+        sd1 <- sqrt(rowVarsSM(ref))
     }
     expmat_nes <- sREAsm(expmat, geneset, m1 = m1, sd1 = sd1,
         batch_size = batch_size)
@@ -247,10 +256,6 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         if (verbose) {
             message("Computing null model")
         }
-    # Normalizing the gene expression
-        nullmat <- cpm(nullmat)
-        nullmat@x <- log2(nullmat@x + 1)
-        nullmat <- nullmat[rownames(nullmat) %in% genes, , drop = FALSE]
         expmat_null <- sREAsm(nullmat, geneset, m1 = m1, sd1 = sd1,
             batch_size = batch_size)
         # Estimating NES
