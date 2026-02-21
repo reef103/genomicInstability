@@ -21,7 +21,8 @@ inferCNVsc(
 \item{expmat}{Sparse matrix of raw-counts}
 
 \item{nullmat}{Optional sparse matrix with same number of rows as
-\code{expmat} to be used as null model}
+\code{expmat} to be used as null model or index for the cells in expmat
+considered a diploid reference}
 
 \item{species}{Character string indicating the species, either human or mouse}
 

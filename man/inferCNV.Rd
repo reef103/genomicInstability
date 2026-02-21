@@ -11,15 +11,17 @@ inferCNV(
   k = 100,
   skip = 25,
   min_geneset = 10,
+  batch_size = 1000,
   verbose = TRUE
 )
 }
 \arguments{
-\item{expmat}{Matrix of gene expression profiles or signatures with genes
-'(entrezID) in rows and samples in columns}
+\item{expmat}{Matrix or sparse matrix of gene expression profiles or
+signatures with genes '(entrezID) in rows and samples in columns}
 
-\item{nullmat}{Optional matrix with same number of rows as \code{expmat} to
-be used as null model}
+\item{nullmat}{Optional matrix or sparse matrix with same number of rows as \code{expmat} to
+be used as null model or vector of index positions for the cells in
+expmat that can be considered normal diploid}
 
 \item{species}{Character string indicating the species, either human or mouse}
 
@@ -29,6 +31,11 @@ be used as null model}
 the k genes}
 
 \item{min_geneset}{Integer indicating the minimum size for the genesets}
+
+\item{batch_size}{Number indicating the maximum ize of the batch of cells
+to be analyzed by aREA per iteration. This parameter is used to limit
+memory load when transforming the sparse matrix normalized expression into
+full matrix ranked signature}
 
 \item{verbose}{Logical, whether progress should be reported}
 }
