@@ -1,5 +1,20 @@
 # General functions The functions below are all internal for the package
 
+#' Genomic instability functions for debugging
+#' 
+#' @param path String indicating the path to the genomicInstability package
+#' 
+#' @export
+sourceGenomicInstability <- function(path = "~/code/genomicInstability") {
+    checkmate::assertString(path)
+    source(file.path(path, "R/analysis.r"))
+    source(file.path(path, "R/enrichment.r"))
+    source(file.path(path, "R/general.r"))
+    source(file.path(path, "R/mixGaussianFit.r"))
+    source(file.path(path, "R/plots.r"))
+}
+
+
 # Split a vector based on a window with and displacement This function split a
 # vector into a list of vectors with a given window width and displacement
 # @param x Vector to split @param k Integer indicating the window width

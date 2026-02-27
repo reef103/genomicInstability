@@ -100,13 +100,11 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         all.missing = FALSE, min.rows = 1000, min.cols = 1, row.names = "named",
         col.names = "named"),
         checkmate::testClass(expmat, "Matrix"))
-    checkmate::assert(checkmate::textMatrix(nullmat, mode = "numeric",
+    checkmate::assert(checkmate::testMatrix(nullmat, mode = "numeric",
         all.missing = FALSE, min.rows = 1000, min.cols = 1, row.names = "named",
         null.ok = TRUE),
         checkmate::testNumeric(nullmat, lower = 1, upper = ncol(expmat)),
         checkmate::testClass(nullmat, "Matrix"))
-    checkmate::assertMatrix(nullmat, mode = "numeric", all.missing = FALSE,
-        min.rows = 1000, min.cols = 1, row.names = "named", null.ok = TRUE)
     checkmate::assertInt(k, lower = 10, upper = 1000)
     checkmate::assertInt(skip, lower = 1, upper = k)
     checkmate::assertInt(min_geneset, lower = 2, upper = k)
@@ -332,16 +330,27 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
 #' expression data.
 #'
 #' @export
-genomicInstabilityScore <- function(cnv, likelihood = FALSE) {
+genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
+    likelihood = FALSE) {
     # Validating inputs
     checkmate::assertLogical(likelihood, len = 1)
+    method <- match.arg(method)
     validateInferCNV(cnv, "nes")
     # Compute genomic instability score
-    gis <- log2(colVars(cnv[["nes"]]))
     gisnull <- NULL  # Initialize gisnull
-    if (!is.null(cnv[["null"]])) {
-        gisnull <- log2(colVars(cnv[["null"]]))
-    }
+    switch(method,
+    var = {
+        gis <- log2(colVars(cnv[["nes"]]))
+        if (!is.null(cnv[["null"]])) {
+            gisnull <- log2(colVars(cnv[["null"]]))
+        }
+    },
+    meansq = {
+        gis <- log2(colMeans(cnv[["nes"]] ^ 2, na.rm = TRUE))
+        if (!is.null(cnv[["null"]])) {
+            gisnull <- log2(colMeans(cnv[["null"]] ^ 2, na.rm = TRUE))
+        }
+    })
     cnv[["gis"]] <- gis
     cnv[["gisnull"]] <- gisnull
     if (likelihood) {
