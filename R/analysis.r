@@ -368,10 +368,13 @@ genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
 #' @param distros Vector of 2 integers indicating the minimum and maximum number
 #' of Gaussian models to fit
 #' @param tumor Optional vector of integers indicating the Gaussians considered
-#' as tumors
+#' as tumors, accepts first and last
 #' @param normal Optional vector of integers indicating the Gaussians considered
 #' as normal. This is only useful when no null model has been provided for the
-#' analysis
+#' analysis, accepts firt and last
+#' @param adjust Method for multiple hypohesis test adjustment to be used when
+#' null model is provided but there is no clear separation between distributions
+#' @param pval Number indicating the p-value threshold
 #'
 #' @return Updated inferCNV-class object with gi_likelihood slot
 #'
@@ -392,22 +395,30 @@ genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
 #' score for each cell in the dataset, and [inferCNV()] to infer the enrichment
 #' of loci-blocks in the gene expression data.
 #' @export
-giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 3),
-    tumor = NULL, normal = NULL) {
+giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
+    tumor = NULL, normal = NULL, adjust = c("fdr", "none", "holm", "hochberg",
+    "hommel", "bonferroni", "BH", "BY"), pval = .05) {
     # Validate inputs
     validateInferCNV(inferCNV, "nes")
     checkmate::assertLogical(recompute, len = 1)
     checkmate::assertIntegerish(distros, lower = 1, upper = 10, len = 2,
         any.missing = FALSE)
-    checkmate::assertIntegerish(tumor, lower = 1, upper = max(distros),
-        any.missing = FALSE, null.ok = TRUE)
-    checkmate::assertIntegerish(normal, lower = 1, upper = max(distros),
-        any.missing = FALSE, null.ok = TRUE)
+    checkmate::assert(
+        checkmate::testIntegerish(tumor, lower = 1, upper = max(distros),
+        any.missing = FALSE, null.ok = TRUE),
+        checkmate::testString(tumor, pattern = "first|last"))
+    checkmate::assert(
+        checkmate::testIntegerish(normal, lower = 1, upper = max(distros),
+        any.missing = FALSE, null.ok = TRUE),
+        checkmate::testString(normal, pattern = "first|last"))
+    checkmate::assertNumber(pval, lower = 0, upper = 1)
+    adjust <- match.arg(adjust)
     # sort distros indexes
     distros <- sort(distros)
     # Compute GIS if not done previously
-    if (is.null(inferCNV[["gis"]]))
+    if (is.null(inferCNV[["gis"]])) {
         inferCNV <- genomicInstabilityScore(inferCNV)
+    }
     # Fit mixture gaussians to the results
     if (is.null(inferCNV[["gi_fit"]]) | recompute) {
         results_fit <- mixGaussianFit(inferCNV[["gis"]], min = distros[1],
@@ -415,36 +426,75 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 3),
         inferCNV[["gi_fit"]] <- results_fit
     }
     results_fit <- inferCNV[["gi_fit"]]
-    # If no tumor models are selected, asign the last gaussian
-    if (is.null(tumor))
-        tumor <- 2:length(results_fit[["mu"]])
-    if (any(tumor > length(results_fit[["mu"]])))
+
+    # If gisnull and no tumor and normal then return likelihood based on p-value
+    if (length(inferCNV[["gisnull"]]) > 0 & length(tumor) == 0 & length(normal) == 0) {
+        null_fit <- mixGaussianFit(inferCNV[["gisnull"]], min = distros[1],
+            max = distros[2])
+        if (max(null_fit$mu) >= max(results_fit$mu)) {
+            cdf <- n1platform:::aecdf(inferCNV$gisnull)
+            p <- cdf(inferCNV$gis, alternative = "greater")$p.value %>%
+                p.adjust(method = adjust)
+            inferCNV[["gi_likelihood"]] <- n1platform:::sigT(-log10(p),
+                slope = 2, inflection = -log10(pval))
+            return(inferCNV)
+        }
+        pos <- which(results_fit$mu > max(null_fit$mu))
+        results_fit$mu <- c(null_fit$mu, results_fit$mu[pos])
+        results_fit$sigma <- c(null_fit$sigma, results_fit$sigma[pos])
+        results_fit$lambda <- c(null_fit$lambda, results_fit$lambda[pos])
+        results_fit$lambda <- results_fit$lambda / sum(results_fit$lambda)
+        normal <- seq_len(length(null_fit$mu))
+        tumor <- seq_len(length(results_fit$mu))[-normal]
+    }
+
+    # Adjust tumor and normal
+    if (length(tumor) > 0) {
+        tumor[tummor == "fist"] <- 1
+        tumor[tumor == "last"] <- length(results_fit[["mu"]])
+        tumor <- round(as.numeric(tumor))
+    }
+    if (length(normal) > 0) {
+        normal[normal == "first"] <- 1
+        normal[normal == "last"] <- length(results_fit[["mu"]])
+        normal <- round(as.numeric(normal))
+    }
+
+    # If no tumor and normal models are selected, asign the last gaussian
+    if (length(tumor) == 0 & length(normal) == 0) {
+        normal <- 1
+        if (length(results_fit[["mu"]]) > 1) {
+            normal <- seq_len(length(results_fit[["mu"]]) - 1)
+        }
+        tumor <- length(results_fit[["mu"]])
+    }
+    if (length(normal) == 0) {
+        pos <- seq_len(length(results_fit[["mu"]]))
+        normal <- pos[pos != tumor]
+    }
+    if (length(tumor) == 0) {
+        pos <- seq_len(length(results_fit[["mu"]]))
+        tumor <- pos[pos != normal]
+    }
+    if (any(tumor > length(results_fit[["mu"]]))) {
         stop("Tumor selection is larger than the number of models",
             call. = FALSE)
-    # If there is a null model
-    if (!is.null(inferCNV[["gisnull"]]) & is.null(normal)) {
-        # Keep only the null model and the ones selected as tumor
-        results_fit[["mu"]] <- c(mean(inferCNV[["gisnull"]], na.rm = TRUE),
-            results_fit[["mu"]][tumor])
-        results_fit[["sigma"]] <- c(sd(inferCNV[["gisnull"]], na.rm = TRUE),
-            results_fit[["sigma"]][tumor])
-        # Adjust the tumor positions to account for the removed models and the
-        # null model
-        tumor <- (seq_len(length(tumor))) + 1
-    } else {
-        if (is.null(normal))
-            normal <- 1
-        if (any(normal > length(results_fit[["mu"]])))
-            stop("Normal selection is larger than the number of models",
-                call. = FALSE)
-        # Keep only selected models
-        results_fit[["mu"]] <- results_fit[["mu"]][c(normal, tumor)]
-        results_fit[["sigma"]] <- results_fit[["sigma"]][c(normal, tumor)]
-        # Adjust normal and tumor indexes
-        normal <- seq_len(length(normal))
-        tumor <- (seq_len(length(tumor))) + length(normal)
     }
+    if (any(normal > length(results_fit[["mu"]])))
+        stop("Normal selection is larger than the number of models",
+            call. = FALSE)
+
+    # Keep only selected models
+    results_fit[["mu"]] <- results_fit[["mu"]][c(normal, tumor)]
+    results_fit[["sigma"]] <- results_fit[["sigma"]][c(normal, tumor)]
+    # Adjust normal and tumor indexes
+    normal <- seq_len(length(normal))
+    tumor <- (seq_len(length(tumor))) + length(normal)
+    results_fit$normal <- normal
+    results_fit$tumor <- tumor
+
     # Compute relative likelihood
+    inferCNV[["gi_fit"]] <- results_fit
     inferCNV[["gi_likelihood"]] <- rowSums(predict(results_fit,
         inferCNV[["gis"]], tumor))
     return(inferCNV)

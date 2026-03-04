@@ -7,9 +7,11 @@
 giLikelihood(
   inferCNV,
   recompute = TRUE,
-  distros = c(1, 3),
+  distros = c(1, 10),
   tumor = NULL,
-  normal = NULL
+  normal = NULL,
+  adjust = c("fdr", "none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY"),
+  pval = 0.05
 )
 }
 \arguments{
@@ -21,11 +23,16 @@ giLikelihood(
 of Gaussian models to fit}
 
 \item{tumor}{Optional vector of integers indicating the Gaussians considered
-as tumors}
+as tumors, accepts first and last}
 
 \item{normal}{Optional vector of integers indicating the Gaussians considered
 as normal. This is only useful when no null model has been provided for the
-analysis}
+analysis, accepts firt and last}
+
+\item{adjust}{Method for multiple hypohesis test adjustment to be used when
+null model is provided but there is no clear separation between distributions}
+
+\item{pval}{Number indicating the p-value threshold}
 }
 \value{
 Updated inferCNV-class object with gi_likelihood slot
