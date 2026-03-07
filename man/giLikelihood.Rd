@@ -11,7 +11,8 @@ giLikelihood(
   tumor = NULL,
   normal = NULL,
   adjust = c("fdr", "none", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY"),
-  pval = 0.05
+  pval = 0.05,
+  seed = NULL
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ analysis, accepts firt and last}
 null model is provided but there is no clear separation between distributions}
 
 \item{pval}{Number indicating the p-value threshold}
+
+\item{seed}{Optional seed for random number generation}
 }
 \value{
 Updated inferCNV-class object with gi_likelihood slot

@@ -375,6 +375,7 @@ genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
 #' @param adjust Method for multiple hypohesis test adjustment to be used when
 #' null model is provided but there is no clear separation between distributions
 #' @param pval Number indicating the p-value threshold
+#' @param seed Optional seed for random number generation
 #'
 #' @return Updated inferCNV-class object with gi_likelihood slot
 #'
@@ -397,7 +398,7 @@ genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
 #' @export
 giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
     tumor = NULL, normal = NULL, adjust = c("fdr", "none", "holm", "hochberg",
-    "hommel", "bonferroni", "BH", "BY"), pval = .05) {
+    "hommel", "bonferroni", "BH", "BY"), pval = .05, seed = NULL) {
     # Validate inputs
     validateInferCNV(inferCNV, "nes")
     checkmate::assertLogical(recompute, len = 1)
@@ -412,6 +413,7 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
         any.missing = FALSE, null.ok = TRUE),
         checkmate::testString(normal, pattern = "first|last"))
     checkmate::assertNumber(pval, lower = 0, upper = 1)
+    checkmate::assertNumber(seed, null.ok = TRUE)
     adjust <- match.arg(adjust)
     # sort distros indexes
     distros <- sort(distros)
@@ -420,6 +422,9 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
         inferCNV <- genomicInstabilityScore(inferCNV)
     }
     # Fit mixture gaussians to the results
+    if (length(seed) == 1) {
+        set.seed(seed)
+    }
     if (is.null(inferCNV[["gi_fit"]]) | recompute) {
         results_fit <- mixGaussianFit(inferCNV[["gis"]], min = distros[1],
             max = distros[2])
@@ -440,17 +445,27 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
             return(inferCNV)
         }
         pos <- which(results_fit$mu > max(null_fit$mu))
+        # Remove overlaping
+        if (length(pos) > 1) {
+            ol <- maxGaussianOverlap(null_fit[names(null_fit) %in% c("mu", "sigma")],
+                lapply(results_fit[names(results_fit) %in% c("mu", "sigma")], function(x, pos) x[pos], pos = pos))
+            pos1 <- which(ol < .25)
+            if (length(pos1) > 0) {
+                pos <- pos[pos1]
+            } else {
+                pos <- max(pos)
+            }
+        }
         results_fit$mu <- c(null_fit$mu, results_fit$mu[pos])
         results_fit$sigma <- c(null_fit$sigma, results_fit$sigma[pos])
-        results_fit$lambda <- c(null_fit$lambda, results_fit$lambda[pos])
-        results_fit$lambda <- results_fit$lambda / sum(results_fit$lambda)
+        results_fit$lambda <- c(null_fit$lambda * length(inferCNV$gisnull) / length(inferCNV$gis), results_fit$lambda[pos])
         normal <- seq_len(length(null_fit$mu))
         tumor <- seq_len(length(results_fit$mu))[-normal]
     }
 
     # Adjust tumor and normal
     if (length(tumor) > 0) {
-        tumor[tummor == "fist"] <- 1
+        tumor[tumor == "fist"] <- 1
         tumor[tumor == "last"] <- length(results_fit[["mu"]])
         tumor <- round(as.numeric(tumor))
     }
