@@ -390,8 +390,8 @@ msq <- function(nes, quantile = NULL, ref = NULL) {
         min.cols = 1, row.names = "named", col.names = "named")
     checkmate::assertNumber(quantile, lower = 0, upper = 1, null.ok = TRUE)
     checkmate::assertCharacter(ref, null.ok = TRUE)
-    if (!is.null(quantile)) {
-        return(colMeans(nes^2, na.rm = TRUE))
+    if (length(quantile) == 0) {
+        return(log2(colMeans(nes^2, na.rm = TRUE)))
     }
     if (is.null(ref)) {
         tmp <- nes
@@ -399,7 +399,7 @@ msq <- function(nes, quantile = NULL, ref = NULL) {
         tmp <- nes[, !(colnames(nes) %in% ref), drop = FALSE]
     }
     genes <- hotSpotGenes(tmp, quantile = quantile)
-    colMeans(nes[genes, , drop = FALSE]^2, na.rm = TRUE)
+    log2(colMeans(nes[genes, , drop = FALSE]^2, na.rm = TRUE))
 }
 
 #' Select hotspot genes based on mean squared CNA values
