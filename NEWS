@@ -1,1 +1,3 @@
- 
+# New for version 1.3.3
+Added mean of squared CNV scores as additional method to quantify genomic instability
+Improved the tumor likelihood estimation 
