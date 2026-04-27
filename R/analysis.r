@@ -622,3 +622,56 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
         inferCNV[["gis"]], tumor))
     return(inferCNV)
 }
+
+#' Weighted mean by rows
+#' 
+#' @param x Sparse matrix
+#' @param w Numeric vector of weights
+#' @return Vector of weighted means
+rowWMeans <- function (x, w) {
+    checkmate::assertClass(x, "Matrix")
+    checkmate::assertNumeric(w, len = ncol(x))
+    colWMeans(t(x), w)
+}
+
+#' Weighted mean by columns
+#' 
+#' @param x Sparse matrix
+#' @param w Numeric vector of weights
+#' @return Vector of weighted means
+colWMeans <- function (x, w) {
+    checkmate::assertClass(x, "Matrix")
+    checkmate::assertNumeric(w, len = nrow(x))
+    w <- w / sum(w, na.rm = TRUE)
+    Matrix::colSums(x * w, na.rm = TRUE)
+}
+
+#' Weighted variance by rows
+#' 
+#' @param x Sparse matrix
+#' @param w Numeric vector of weights
+#' @return Vector of weighted variances
+rowWVars <- function (x, w) {
+    checkmate::assertClass(x, "Matrix")
+    checkmate::assertNumeric(w, len = ncol(x))   
+    colWVars(t(x), w)
+}
+
+#' Weighted variance by columns
+#' 
+#' @param x Sparse matrix
+#' @param w Numeric vector of weights
+#' @return Vector of weighted variances
+colWVars <- function (x, w) {
+    checkmate::assertClass(x, "Matrix")
+    checkmate::assertNumeric(w, len = nrow(x))
+    w <- w / sum(w, na.rm = TRUE)
+    m <- Matrix::colSums(x * w, na.rm = TRUE)
+    x2 <- x
+    x2@x <- x2@x^2
+    term1 <- as.numeric(crossprod(w, x2))
+    wx_sum <- as.numeric(crossprod(w, x))
+    term2 <- -2 * m * wx_sum
+    term3 <- (m^2)
+    term1 + term2 + term3      
+}
