@@ -628,10 +628,10 @@ giLikelihood <- function(inferCNV, recompute = TRUE, distros = c(1, 10),
 #' @param x Sparse matrix
 #' @param w Numeric vector of weights
 #' @return Vector of weighted means
-rowWMeans <- function (x, w) {
+rowWMeans <- function(x, w) {
     checkmate::assertClass(x, "Matrix")
     checkmate::assertNumeric(w, len = ncol(x))
-    colWMeans(t(x), w)
+    colWMeans(Matrix::t(x), w)
 }
 
 #' Weighted mean by columns
@@ -639,7 +639,7 @@ rowWMeans <- function (x, w) {
 #' @param x Sparse matrix
 #' @param w Numeric vector of weights
 #' @return Vector of weighted means
-colWMeans <- function (x, w) {
+colWMeans <- function(x, w) {
     checkmate::assertClass(x, "Matrix")
     checkmate::assertNumeric(w, len = nrow(x))
     w <- w / sum(w, na.rm = TRUE)
@@ -651,10 +651,10 @@ colWMeans <- function (x, w) {
 #' @param x Sparse matrix
 #' @param w Numeric vector of weights
 #' @return Vector of weighted variances
-rowWVars <- function (x, w) {
+rowWVars <- function(x, w) {
     checkmate::assertClass(x, "Matrix")
-    checkmate::assertNumeric(w, len = ncol(x))   
-    colWVars(t(x), w)
+    checkmate::assertNumeric(w, len = ncol(x))
+    colWVars(Matrix::t(x), w)
 }
 
 #' Weighted variance by columns
@@ -662,7 +662,7 @@ rowWVars <- function (x, w) {
 #' @param x Sparse matrix
 #' @param w Numeric vector of weights
 #' @return Vector of weighted variances
-colWVars <- function (x, w) {
+colWVars <- function(x, w) {
     checkmate::assertClass(x, "Matrix")
     checkmate::assertNumeric(w, len = nrow(x))
     w <- w / sum(w, na.rm = TRUE)
