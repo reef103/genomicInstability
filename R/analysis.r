@@ -184,6 +184,14 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
 #' @param min_geneset Integer indicating the minimum size for the genesets
 #' @param center Logical, whether to subtract the mean expression of each gene
 #' @param scale Logical, whether to divide by each gene standard deviation
+#' @param cell_class Optional named vector of character strings indicating the
+#' class of each cell in the expmat and nullmat matrices.
+#' This is used for regularizing the mean and standard deviation estimation when
+#' center and scale are TRUE, by using the mean and standard deviation of the
+#' cells in the same class instead of all the cells. This is useful when there
+#' are different cell types in the dataset with different expression profiles,
+#' which can affect the estimation of the mean and standard deviation for each
+#' gene.
 #' @param batch_size Number indicating the maximum ize of the batch of cells
 #' to be analyzed by aREA per iteration. This parameter is used to limit
 #' memory load when transforming the sparse matrix normalized expression into
@@ -207,7 +215,7 @@ inferCNV <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
 #' @export
 inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     k = 100, skip = 25, min_geneset = 10, center = TRUE, scale = FALSE,
-    batch_size = 1000, verbose = TRUE) {
+    cell_class = NULL, batch_size = 1000, verbose = TRUE) {
     # Check values for species
     species <- match.arg(species)
     # Validate input
@@ -219,6 +227,7 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     checkmate::assertInt(min_geneset, lower = 2, upper = k)
     checkmate::assertFlag(center)
     checkmate::assertFlag(scale)
+    checkmate::assertCharacter(cell_class, null.ok = TRUE)
     checkmate::assertNumber(batch_size, lower = 1, upper = Inf)
     checkmate::assertLogical(verbose, len = 1)
     batch_size <- round(batch_size)
@@ -231,8 +240,9 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
         nullmat <- nullmat[match(genes, rownames(nullmat)), , drop = FALSE]
     }
     # Generate genesets
-    if (verbose)
+    if (verbose) {
         message("Generating the genesets from the genome information")
+    }
     geneset <- generateChromosomeGeneSet(species, k = k, skip = skip)
     # filter represented genes
     geneset <- lapply(geneset, keepVectorElements, elements = rownames(expmat))
@@ -243,34 +253,67 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
     }
     genes <- unique(unlist(geneset, use.names = FALSE))
     # Normalizing the gene expression
-    expmat <- cpm(expmat)
+    expmat <- scrnaseqdatasets::cpm(expmat)
     expmat@x <- log2(expmat@x + 1)
     # Enrichment for the expmat
-    if (verbose)
+    if (verbose) {
         message("Computing the enrichment for the genesets in the expression matrix")
+    }
     expmat <- expmat[rownames(expmat) %in% genes, , drop = FALSE]
-    ref <- expmat
+    # Regularized mean and SD for expmat
+    expmat_m <- 0
+    expmat_sd <- 1
+    if (any(colnames(expmat) %in% names(cell_class))) {
+        ref <- expmat[, colnames(expmat) %in% names(cell_class), drop = FALSE]
+        cl <- cell_class[match(colnames(ref), names(cell_class))]
+        w <- 1 / table(cl)
+        w <- as.numeric(w[match(cl, names(w))])
+        expmat_m <- rowWMeans(ref, w = w)
+        expmat_sd <- sqrt(rowWVars(ref, w = w))
+    }
+    # Regularized mean and SD for nullmat
+    nullmat_m <- 0
+    nullmat_sd <- 1
+    ref <- NULL
     if (length(nullmat) > 0) {
         if (!is.null(nrow(nullmat))) {
-            nullmat <- cpm(nullmat)
-            nullmat@x <- log2(nullmat@x + 1)
-            genes <- intersect(rownames(expmat), rownames(nullmat))
-            expmat <- expmat[match(genes, rownames(expmat)), , drop = FALSE]
-            nullmat <- nullmat[match(genes, rownames(nullmat)), , drop = FALSE]
-            ref <- nullmat
+            if (any(colnames(nullmat) %in% names(cell_class))) {
+                ref <- nullmat[, colnames(nullmat) %in% names(cell_class), drop = FALSE]
+                cl <- cell_class[match(colnames(ref), names(cell_class))]
+                w <- 1 / table(cl)
+                w <- w[match(cl, names(w))]
+                nullmat_m <- rowWMeans(ref, w = w)
+                nullmat_sd <- sqrt(rowWVars(ref, w = w))
+            }
         } else {
             ref <- expmat[, round(nullmat), drop = FALSE]
+            if (any(colnames(ref) %in% names(cell_class))) {
+                ref <- ref[, colnames(ref) %in% names(cell_class), drop = FALSE]
+                cl <- cell_class[match(colnames(ref), names(cell_class))]
+                w <- 1 / table(cl)
+                w <- w[match(cl, names(w))]
+                nullmat_m <- rowWMeans(ref, w = w)
+                nullmat_sd <- sqrt(rowWVars(ref, w = w))
+            }
+        }
+        if (length(nullmat_m) == 1 & length(expmat_m) > 1) {
+            nullmat_m <- expmat_m
+            nullmat_sd <- expmat_sd
+        }
+        if (length(nullmat_m) > 1 & length(expmat_m) == 1) {
+            expmat_m <- nullmat_m
+            expmat_sd <- nullmat_sd
         }
     }
-    m1 <- 0
-    sd1 <- 1
-    if (center) {
-        m1 <- Matrix::rowMeans(ref, na.rm = TRUE)
+
+    if (!center) {
+        expmat_m <- nullmat_m <- 0
     }
-    if (scale) {
-        sd1 <- sqrt(rowVarsSM(ref))
+    if (!scale) {
+        expmat_sd <- nullmat_sd <- 1
     }
-    expmat_nes <- sREAsm(expmat, geneset, m1 = m1, sd1 = sd1,
+
+    expmat_nes <- sREAsm(expmat, geneset, m1 = expmat_m, sd1 = expmat_sd,
         batch_size = batch_size)
     # Enrichment of the null model
     nullnes <- NULL  # Initialize the null nes variable
@@ -279,7 +322,7 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
             message("Computing null model")
         }
         if (!is.null(nrow(nullmat))) {
-            expmat_null <- sREAsm(nullmat, geneset, m1 = m1, sd1 = sd1,
+            expmat_null <- sREAsm(nullmat, geneset, m1 = nullmat_m, sd1 = nullmat_sd,
                 batch_size = batch_size)
         } else {
             expmat_null <- expmat_nes[, round(nullmat), drop = FALSE]

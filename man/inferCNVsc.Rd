@@ -13,6 +13,7 @@ inferCNVsc(
   min_geneset = 10,
   center = TRUE,
   scale = FALSE,
+  cell_class = NULL,
   batch_size = 1000,
   verbose = TRUE
 )
@@ -36,6 +37,15 @@ the k genes}
 \item{center}{Logical, whether to subtract the mean expression of each gene}
 
 \item{scale}{Logical, whether to divide by each gene standard deviation}
+
+\item{cell_class}{Optional named vector of character strings indicating the
+class of each cell in the expmat and nullmat matrices.
+This is used for regularizing the mean and standard deviation estimation when
+center and scale are TRUE, by using the mean and standard deviation of the
+cells in the same class instead of all the cells. This is useful when there
+are different cell types in the dataset with different expression profiles,
+which can affect the estimation of the mean and standard deviation for each
+gene.}
 
 \item{batch_size}{Number indicating the maximum ize of the batch of cells
 to be analyzed by aREA per iteration. This parameter is used to limit
