@@ -281,7 +281,7 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
                 ref <- nullmat[, colnames(nullmat) %in% names(cell_class), drop = FALSE]
                 cl <- cell_class[match(colnames(ref), names(cell_class))]
                 w <- 1 / table(cl)
-                w <- w[match(cl, names(w))]
+                w <- as.numeric(w[match(cl, names(w))])
                 nullmat_m <- rowWMeans(ref, w = w)
                 nullmat_sd <- sqrt(rowWVars(ref, w = w))
             }
@@ -291,7 +291,7 @@ inferCNVsc <- function(expmat, nullmat = NULL, species = c("human", "mouse"),
                 ref <- ref[, colnames(ref) %in% names(cell_class), drop = FALSE]
                 cl <- cell_class[match(colnames(ref), names(cell_class))]
                 w <- 1 / table(cl)
-                w <- w[match(cl, names(w))]
+                w <- as.numeric(w[match(cl, names(w))])
                 nullmat_m <- rowWMeans(ref, w = w)
                 nullmat_sd <- sqrt(rowWVars(ref, w = w))
             }
