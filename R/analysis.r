@@ -396,7 +396,8 @@ genomicInstabilityScore <- function(cnv, method = c("var", "meansq"),
     },
     meansq = {
         ref <- NULL
-        if (all(colnames(cnv[["null"]]) %in% colnames(cnv[["nes"]]))) {
+        if (all(colnames(cnv[["null"]]) %in% colnames(cnv[["nes"]])) &
+            !(all(colnames(cnv[["nes"]]) %in% colnames(cnv[["null"]])))) {
             ref <- colnames(cnv[["null"]])
         }
         gis <- msq(cnv[["nes"]], quantile = quantile, ref = ref)
